@@ -1,14 +1,9 @@
 services:
   - type: web
     name: nzoo-immo
-    env: node
-    region: oregon
-    plan: free
+    env: static
     buildCommand: npm ci && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_VERSION
-        value: 18
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*

@@ -4,63 +4,104 @@ export interface Database {
       reservations: {
         Row: {
           id: string;
-          fullname: string;
+          full_name: string;
           email: string;
           phone: string;
           company: string | null;
           activity: string;
           address: string | null;
-          spacetype: string;
-          startdate: string;
-          enddate: string;
+          space_type: string;
+          start_date: string;
+          end_date: string;
           occupants: number;
-          subscriptiontype: string;
+          subscription_type: string;
           amount: number;
-          paymentmethod: string;
-          transactionid: string;
+          payment_method: string;
+          transaction_id: string;
           status: string;
-          createdat: string;
-          updatedat: string;
+          notes: string | null;
+          admin_notes: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
-          fullname: string;
+          full_name: string;
           email: string;
           phone: string;
           company?: string | null;
           activity: string;
           address?: string | null;
-          spacetype: string;
-          startdate: string;
-          enddate: string;
+          space_type: string;
+          start_date: string;
+          end_date: string;
           occupants: number;
-          subscriptiontype: string;
+          subscription_type: string;
           amount: number;
-          paymentmethod: string;
-          transactionid: string;
+          payment_method: string;
+          transaction_id: string;
           status?: string;
-          createdat?: string;
-          updatedat?: string;
+          notes?: string | null;
+          admin_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
-          fullname?: string;
+          full_name?: string;
           email?: string;
           phone?: string;
           company?: string | null;
           activity?: string;
           address?: string | null;
-          spacetype?: string;
-          startdate?: string;
-          enddate?: string;
+          space_type?: string;
+          start_date?: string;
+          end_date?: string;
           occupants?: number;
-          subscriptiontype?: string;
+          subscription_type?: string;
           amount?: number;
-          paymentmethod?: string;
-          transactionid?: string;
+          payment_method?: string;
+          transaction_id?: string;
           status?: string;
-          createdat?: string;
-          updatedat?: string;
+          notes?: string | null;
+          admin_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      admin_users: {
+        Row: {
+          id: string;
+          username: string;
+          email: string;
+          password_hash: string;
+          role: string;
+          full_name: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          username: string;
+          email: string;
+          password_hash: string;
+          role?: string;
+          full_name: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          username?: string;
+          email?: string;
+          password_hash?: string;
+          role?: string;
+          full_name?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
       };
     };
@@ -68,6 +109,19 @@ export interface Database {
       create_reservation_admin: {
         Args: {
           reservation_data: Json;
+        };
+        Returns: Json;
+      };
+      update_reservation_admin: {
+        Args: {
+          reservation_id: string;
+          reservation_data: Json;
+        };
+        Returns: Json;
+      };
+      delete_reservation_admin: {
+        Args: {
+          reservation_id: string;
         };
         Returns: Json;
       };

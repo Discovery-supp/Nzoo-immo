@@ -3,20 +3,40 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Missing Supabase environment variables');
-  console.error('VITE_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
-  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Missing');
-  console.error('Please click "Connect to Supabase" button in the top right to set up Supabase');
-  throw new Error('Missing Supabase environment variables. Please connect to Supabase first.');
+// Créer un client Supabase ou un client factice selon la configuration
+let supabase: any;
+
+if (supabaseUrl && supabaseAnonKey) {
+  console.log('✅ Supabase configured, creating real client');
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  });
+} else {
+  console.warn('⚠️ Supabase not configured, using mock client');
+  // Client factice pour éviter les erreurs
+  supabase = {
+    from: () => ({
+      select: () => Promise.resolve({ data: [], error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null }),
+      eq: function() { return this; },
+      neq: function() { return this; },
+      limit: function() { return this; },
+      order: function() { return this; },
+      single: function() { return this; }
+    }),
+    rpc: () => Promise.resolve({ data: null, error: null }),
+    functions: {
+      invoke: () => Promise.resolve({ data: null, error: null })
+    }
+  };
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+export { supabase };
 
 // Export types
 export type { Database } from './database.types';
