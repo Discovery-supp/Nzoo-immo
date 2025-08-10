@@ -210,19 +210,10 @@ const HomePage: React.FC = () => {
               >
                 {t.hero.title}
               </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-xl sm:text-2xl md:text-3xl mb-8 sm:mb-10 max-w-4xl mx-auto leading-relaxed font-poppins drop-shadow-xl"
-                style={{ color: '#000000' }}
-              >
-                {t.hero.subtitle}
-              </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
                 className="flex flex-col sm:flex-row gap-6 justify-center items-center"
               >
                 <button
