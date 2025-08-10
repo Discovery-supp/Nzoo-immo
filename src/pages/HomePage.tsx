@@ -236,6 +236,51 @@ const HomePage: React.FC = () => {
                 />
               </motion.div>
             ))}
+          
+          {/* Overlay gradient pour améliorer la lisibilité */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-black/40"></div>
+          <div className="absolute inset-0 bg-nzoo-dark/30"></div>
+          
+          {/* Contenu centré sur le carrousel */}
+          <div className="relative z-10 flex items-center justify-center h-full">
+            <div className="text-center text-white px-4 max-w-4xl">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-montserrat drop-shadow-lg"
+              >
+                {t.hero.title}
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed font-poppins drop-shadow-md"
+              >
+                {t.hero.subtitle}
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              >
+                <button
+                  onClick={goToSpaces}
+                  className="bg-nzoo-white text-nzoo-dark hover:bg-nzoo-gray/20 py-3 px-8 rounded-2xl shadow-nzoo hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105 font-bold text-lg w-full sm:w-auto font-montserrat"
+                >
+                  {t.hero.ctaPrimary}
+                </button>
+                <button
+                  onClick={() => window.scrollTo({ top: document.querySelector('#services')?.offsetTop, behavior: 'smooth' })}
+                  className="border-2 border-white text-white hover:bg-white hover:text-nzoo-dark py-3 px-8 rounded-2xl transition-all duration-300 font-bold text-lg w-full sm:w-auto font-montserrat backdrop-blur-sm"
+                >
+                  En savoir plus
+                </button>
+              </motion.div>
+            </div>
+          </div>
           </div>
           
           {/* Indicateurs de pagination */}
@@ -254,36 +299,6 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Hero Section */}
-        <section className="relative flex items-center justify-center min-h-[50vh] sm:min-h-[60vh] bg-gradient-to-br from-secondary/10 via-white to-accent/10 dark:from-neutral-900 dark:via-neutral-800 dark:to-primary/20">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="text-center text-neutral-900 dark:text-neutral-100 px-4 max-w-5xl"
-          >
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 sm:mb-8 bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent font-montserrat">
-              {t.hero.title}
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 text-neutral-600 dark:text-neutral-300 max-w-4xl mx-auto leading-relaxed px-2">
-              {t.hero.subtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button
-                onClick={goToSpaces}
-                className="bg-nzoo-dark hover:bg-nzoo-dark-light text-nzoo-white py-4 px-8 rounded-2xl shadow-nzoo hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105 font-bold text-lg w-full sm:w-auto font-montserrat"
-              >
-                {t.hero.ctaPrimary}
-              </button>
-              <button
-                onClick={() => window.scrollTo({ top: document.querySelector('#services')?.offsetTop, behavior: 'smooth' })}
-                className="border-3 border-nzoo-dark text-nzoo-dark hover:bg-nzoo-dark hover:text-nzoo-white py-4 px-8 rounded-2xl transition-all duration-300 font-bold text-lg w-full sm:w-auto font-montserrat shadow-soft hover:shadow-medium"
-              >
-                Découvrir nos services
-              </button>
-            </div>
-          </motion.div>
-        </section>
 
         {/* Services Section */}
         <section id="services" className="py-24 bg-nzoo-white">
