@@ -206,7 +206,7 @@ const HomePage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 font-montserrat drop-shadow-2xl text-blue-600"
-                style={{ color: '#183154' }}
+                style={{ color: '#FFFFFF' }}
               >
                 {t.hero.title}
               </motion.h1>
@@ -214,7 +214,8 @@ const HomePage: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-xl sm:text-2xl md:text-3xl mb-8 sm:mb-10 text-white/95 max-w-4xl mx-auto leading-relaxed font-poppins drop-shadow-xl"
+                className="text-xl sm:text-2xl md:text-3xl mb-8 sm:mb-10 max-w-4xl mx-auto leading-relaxed font-poppins drop-shadow-xl"
+                style={{ color: '#183154' }}
               >
                 {t.hero.subtitle}
               </motion.p>
