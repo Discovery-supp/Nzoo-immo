@@ -206,6 +206,7 @@ const HomePage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 font-montserrat drop-shadow-2xl text-blue-600"
+                style={{ color: '#183154' }}
               >
                 {t.hero.title}
               </motion.h1>
