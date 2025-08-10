@@ -166,53 +166,10 @@ const HomePage: React.FC = () => {
           >
             {darkMode ? <Sun className="w-5 h-5 text-warning" /> : <Moon className="w-5 h-5 text-neutral-700" />}
           </button>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-black/40"></div>
-          <div className="absolute inset-0 bg-nzoo-dark/30"></div>
-          
-          {/* Contenu centré */}
-          <div className="relative z-10 flex items-center justify-center h-full">
-            <div className="text-center text-white px-4 max-w-4xl">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-montserrat drop-shadow-lg"
-              >
-                Espaces de Travail Modernes
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed font-poppins drop-shadow-md"
-              >
-                Coworking, bureaux privés et services de domiciliation à Kinshasa
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-              >
-                <button
-                  onClick={goToSpaces}
-                  className="bg-nzoo-white text-nzoo-dark hover:bg-nzoo-gray/20 py-3 px-8 rounded-2xl shadow-nzoo hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105 font-bold text-lg w-full sm:w-auto font-montserrat"
-                >
-                  Découvrir nos espaces
-                </button>
-                <button
-                  onClick={() => window.scrollTo({ top: document.querySelector('#services')?.offsetTop, behavior: 'smooth' })}
-                  className="border-2 border-white text-white hover:bg-white hover:text-nzoo-dark py-3 px-8 rounded-2xl transition-all duration-300 font-bold text-lg w-full sm:w-auto font-montserrat backdrop-blur-sm"
-                >
-                  En savoir plus
-                </button>
-              </motion.div>
-            </div>
-          </div>
         </div>
 
-        {/* Carrousel de bannières */}
-        <section className="relative h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] xl:h-[650px] overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+        {/* Section Hero avec Carrousel */}
+        <section className="relative h-[70vh] min-h-[500px] max-h-[800px] overflow-hidden bg-neutral-100 dark:bg-neutral-800">
           <div className="relative w-full h-full">
             {bannerImages.map((image, index) => (
               <motion.div
@@ -241,14 +198,14 @@ const HomePage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-black/40"></div>
           <div className="absolute inset-0 bg-nzoo-dark/30"></div>
           
-          {/* Contenu centré sur le carrousel */}
+          {/* Contenu centré */}
           <div className="relative z-10 flex items-center justify-center h-full">
             <div className="text-center text-white px-4 max-w-4xl">
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-montserrat drop-shadow-lg"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 font-montserrat drop-shadow-2xl"
               >
                 {t.hero.title}
               </motion.h1>
@@ -256,7 +213,7 @@ const HomePage: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed font-poppins drop-shadow-md"
+                className="text-xl sm:text-2xl md:text-3xl mb-8 sm:mb-10 text-white/95 max-w-4xl mx-auto leading-relaxed font-poppins drop-shadow-xl"
               >
                 {t.hero.subtitle}
               </motion.p>
@@ -264,17 +221,17 @@ const HomePage: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+                className="flex flex-col sm:flex-row gap-6 justify-center items-center"
               >
                 <button
                   onClick={goToSpaces}
-                  className="bg-nzoo-white text-nzoo-dark hover:bg-nzoo-gray/20 py-3 px-8 rounded-2xl shadow-nzoo hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105 font-bold text-lg w-full sm:w-auto font-montserrat"
+                  className="bg-nzoo-white text-nzoo-dark hover:bg-nzoo-gray/20 py-4 px-10 rounded-2xl shadow-nzoo hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105 font-bold text-xl w-full sm:w-auto font-montserrat"
                 >
                   {t.hero.ctaPrimary}
                 </button>
                 <button
                   onClick={() => window.scrollTo({ top: document.querySelector('#services')?.offsetTop, behavior: 'smooth' })}
-                  className="border-2 border-white text-white hover:bg-white hover:text-nzoo-dark py-3 px-8 rounded-2xl transition-all duration-300 font-bold text-lg w-full sm:w-auto font-montserrat backdrop-blur-sm"
+                  className="border-3 border-white text-white hover:bg-white hover:text-nzoo-dark py-4 px-10 rounded-2xl transition-all duration-300 font-bold text-xl w-full sm:w-auto font-montserrat backdrop-blur-sm"
                 >
                   En savoir plus
                 </button>
