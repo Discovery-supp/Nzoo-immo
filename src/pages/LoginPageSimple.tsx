@@ -142,17 +142,6 @@ const LoginPageSimple: React.FC<LoginPageSimpleProps> = ({ setIsAuthenticated })
 
         {/* Carte de connexion */}
         <div className="bg-nzoo-white rounded-3xl shadow-nzoo-hover p-8 backdrop-blur-sm border border-nzoo-white/20">
-          {/* Informations de démonstration */}
-          <div className="mb-6 p-4 bg-nzoo-gray/30 border border-nzoo-gray rounded-2xl">
-            <h3 className="text-nzoo-dark font-semibold mb-2 font-montserrat text-sm">
-              Compte de démonstration
-            </h3>
-            <div className="text-nzoo-dark/70 text-sm space-y-1 font-poppins">
-              <p><span className="font-medium">Nom d'utilisateur:</span> <code className="bg-nzoo-gray/50 px-2 py-1 rounded">admin</code></p>
-              <p><span className="font-medium">Mot de passe:</span> <code className="bg-nzoo-gray/50 px-2 py-1 rounded">admin123</code></p>
-            </div>
-          </div>
-
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm font-poppins animate-slideDown">
@@ -212,22 +201,6 @@ const LoginPageSimple: React.FC<LoginPageSimpleProps> = ({ setIsAuthenticated })
                )}
              </button>
 
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setCredentials({ username: 'admin', password: 'admin123' })}
-                className="text-xs bg-nzoo-dark/20 hover:bg-nzoo-dark/30 text-nzoo-dark px-3 py-1 rounded-lg transition-colors font-medium"
-              >
-                Utiliser ces identifiants
-              </button>
-              <button
-                type="button"
-                onClick={() => setCredentials({ username: 'manager', password: 'manager123' })}
-                className="text-xs bg-green-600/20 hover:bg-green-600/30 text-green-800 px-3 py-1 rounded-lg transition-colors font-medium"
-              >
-                Manager
-              </button>
-            </div>
           </form>
 
           <div className="mt-8 pt-6 border-t border-nzoo-gray">
