@@ -9,8 +9,8 @@ console.log('Key:', supabaseAnonKey ? 'Set' : 'Missing');
 
 // Créer le client Supabase
 export const supabase = createClient(
-  supabaseUrl || 'https://zfxkyiusextbhhxemwuu.supabase.co',
-  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmeGt5aXVzZXh0YmhoeGVtd3V1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODU0MTMsImV4cCI6MjA2ODE2MTQxM30.75nsiuH6S1o_OyhynyIOEyLv2YynGP383Ob89ofoujw',
+  supabaseUrl || 'https://nnkywmfxoohehtyyzzgp.supabase.co',
+  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk',
   {
     auth: {
       persistSession: true,
