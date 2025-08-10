@@ -96,12 +96,12 @@ const texts = {
 
 // Images de bannière pour le carrousel
 const bannerImages = [
-  '/Bannières_Pack 1.png',
-  '/Bannières_Pack 6.png',
-  '/Bannières_Pack 4.png',
-  '/Bannières_Pack 2.png',
-  '/Bannière_Pack 5.png',
-  '/Bannières_Pack 3.png',
+  'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop',
+  'https://images.pexels.com/photos/3182773/pexels-photo-3182773.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop',
+  'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop',
+  'https://images.pexels.com/photos/3182834/pexels-photo-3182834.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop',
+  'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop',
+  'https://images.pexels.com/photos/3184639/pexels-photo-3184639.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop',
 ];
 
 const HomePage: React.FC = () => {
@@ -166,6 +166,49 @@ const HomePage: React.FC = () => {
           >
             {darkMode ? <Sun className="w-5 h-5 text-warning" /> : <Moon className="w-5 h-5 text-neutral-700" />}
           </button>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-black/40"></div>
+          <div className="absolute inset-0 bg-nzoo-dark/30"></div>
+          
+          {/* Contenu centré */}
+          <div className="relative z-10 flex items-center justify-center h-full">
+            <div className="text-center text-white px-4 max-w-4xl">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-montserrat drop-shadow-lg"
+              >
+                Espaces de Travail Modernes
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed font-poppins drop-shadow-md"
+              >
+                Coworking, bureaux privés et services de domiciliation à Kinshasa
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              >
+                <button
+                  onClick={goToSpaces}
+                  className="bg-nzoo-white text-nzoo-dark hover:bg-nzoo-gray/20 py-3 px-8 rounded-2xl shadow-nzoo hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105 font-bold text-lg w-full sm:w-auto font-montserrat"
+                >
+                  Découvrir nos espaces
+                </button>
+                <button
+                  onClick={() => window.scrollTo({ top: document.querySelector('#services')?.offsetTop, behavior: 'smooth' })}
+                  className="border-2 border-white text-white hover:bg-white hover:text-nzoo-dark py-3 px-8 rounded-2xl transition-all duration-300 font-bold text-lg w-full sm:w-auto font-montserrat backdrop-blur-sm"
+                >
+                  En savoir plus
+                </button>
+              </motion.div>
+            </div>
+          </div>
         </div>
 
         {/* Carrousel de bannières */}
@@ -185,7 +228,7 @@ const HomePage: React.FC = () => {
                 <img
                   src={image}
                   alt={`Bannière ${index + 1}`}
-                  className="w-full h-full object-contain sm:object-cover max-w-full max-h-full"
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
