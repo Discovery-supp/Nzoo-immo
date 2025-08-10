@@ -6,9 +6,8 @@
   "scripts": {
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview --host 0.0.0.0 --port $PORT",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "dev": "vite"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
