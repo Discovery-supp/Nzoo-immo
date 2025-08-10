@@ -148,8 +148,8 @@ const LoginPageSimple: React.FC<LoginPageSimpleProps> = ({ setIsAuthenticated })
               Compte de démonstration
             </h3>
             <div className="text-nzoo-dark/70 text-sm space-y-1 font-poppins">
-              <p><span className="font-medium">Nom d'utilisateur:</span> admin</p>
-              <p><span className="font-medium">Mot de passe:</span> admin123</p>
+              <p><span className="font-medium">Nom d'utilisateur:</span> <code className="bg-nzoo-gray/50 px-2 py-1 rounded">admin</code></p>
+              <p><span className="font-medium">Mot de passe:</span> <code className="bg-nzoo-gray/50 px-2 py-1 rounded">admin123</code></p>
             </div>
           </div>
 
@@ -205,12 +205,29 @@ const LoginPageSimple: React.FC<LoginPageSimpleProps> = ({ setIsAuthenticated })
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin -ml-1 mr-3 h-5 w-5 border-2 border-nzoo-white border-t-transparent rounded-full"></div>
-                  <span className="font-poppins">Connexion en cours...</span>
-                </div>
-              ) : (
-                'Se connecter'
-              )}
-            </button>
+                   Traitement...
+                 </div>
+               ) : (
+                 'Se connecter'
+               )}
+             </button>
+
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCredentials({ username: 'admin', password: 'admin123' })}
+                className="text-xs bg-nzoo-dark/20 hover:bg-nzoo-dark/30 text-nzoo-dark px-3 py-1 rounded-lg transition-colors font-medium"
+              >
+                Utiliser ces identifiants
+              </button>
+              <button
+                type="button"
+                onClick={() => setCredentials({ username: 'manager', password: 'manager123' })}
+                className="text-xs bg-green-600/20 hover:bg-green-600/30 text-green-800 px-3 py-1 rounded-lg transition-colors font-medium"
+              >
+                Manager
+              </button>
+            </div>
           </form>
 
           <div className="mt-8 pt-6 border-t border-nzoo-gray">
