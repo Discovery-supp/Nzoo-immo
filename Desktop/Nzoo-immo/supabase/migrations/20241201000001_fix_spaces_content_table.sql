@@ -75,3 +75,4 @@ DO $$
 BEGIN
     RAISE NOTICE 'Migration de correction terminée avec succès pour la table spaces_content';
 END $$;
+

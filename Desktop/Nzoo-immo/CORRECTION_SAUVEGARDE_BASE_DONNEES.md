@@ -112,3 +112,4 @@ Votre application aura une **sauvegarde hybride** :
 - **Aucun impact** sur l'expérience utilisateur
 
 La sauvegarde silencieuse sera alors pleinement opérationnelle ! 🎉
+

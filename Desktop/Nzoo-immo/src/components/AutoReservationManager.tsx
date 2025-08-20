@@ -299,3 +299,4 @@ const AutoReservationManager: React.FC<AutoReservationManagerProps> = ({ languag
 };
 
 export default AutoReservationManager;
+

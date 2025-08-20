@@ -8,6 +8,7 @@ import { getSpaceInfo } from '../data/spacesData';
 import { generateAndDownloadReservationInvoice } from '../services/invoiceService';
 import { calculateDaysBetween, calculateTotalPrice } from '../utils/dateUtils';
 import { logger } from '../utils/logger';
+import { cinetpayService, getChannelFromMethod } from '../services/cinetpayService';
 
 interface ReservationPageProps {
   language: 'fr' | 'en';
@@ -559,7 +560,92 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         transactionId = `CASH_${Date.now()}`;
     }
     
-    await handlePayment(paymentMethod, transactionId);
+    // Si c'est un paiement par mobile money, utiliser CinetPay
+    if (selectedPaymentMethod === 'ORANGE_MONEY' || selectedPaymentMethod === 'AIRTEL_MONEY') {
+      await handleMobileMoneyPayment(paymentMethod, transactionId);
+    } else {
+      await handlePayment(paymentMethod, transactionId);
+    }
+  };
+
+  // Gestion des paiements par mobile money via CinetPay
+  const handleMobileMoneyPayment = async (paymentMethod: string, transactionId: string) => {
+    if (!selectedDates) return;
+
+    setReservationError(null);
+
+    try {
+      console.log('📱 Initialisation du paiement mobile money:', {
+        method: selectedPaymentMethod,
+        amount: calculateTotal(),
+        client: formData.fullName
+      });
+
+      // Obtenir le canal de paiement
+      const channel = getChannelFromMethod(selectedPaymentMethod || 'ORANGE_MONEY');
+      
+      // Description du paiement
+      const description = `Réservation ${spaceInfo.title} - ${formData.fullName}`;
+
+      // Initialiser le paiement via CinetPay
+      const paymentResult = await cinetpayService.initiatePayment(
+        calculateTotal(),
+        description,
+        transactionId,
+        formData.fullName,
+        formData.email,
+        formData.phone,
+        channel
+      );
+
+      if (paymentResult.success && paymentResult.paymentUrl) {
+        console.log('✅ Paiement mobile money initialisé:', paymentResult);
+        
+        // Ouvrir la page de paiement dans une nouvelle fenêtre
+        const paymentWindow = window.open(
+          paymentResult.paymentUrl,
+          'CinetPay',
+          'width=500,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        if (paymentWindow) {
+          setPaymentWindow(paymentWindow);
+          
+          // Surveiller la fermeture de la fenêtre de paiement
+          const checkClosed = setInterval(() => {
+            if (paymentWindow.closed) {
+              clearInterval(checkClosed);
+              setPaymentWindow(null);
+              
+              // Vérifier le statut du paiement
+              setTimeout(async () => {
+                try {
+                  const statusResult = await cinetpayService.checkPaymentStatus(transactionId);
+                  
+                  if (statusResult.data && statusResult.data.status === 'SUCCESS') {
+                    // Paiement réussi, créer la réservation
+                    await handlePayment(paymentMethod, transactionId);
+                  } else {
+                    setReservationError('Paiement annulé ou échoué. Veuillez réessayer.');
+                  }
+                } catch (error) {
+                  console.error('❌ Erreur lors de la vérification du statut:', error);
+                  setReservationError('Erreur lors de la vérification du paiement.');
+                }
+              }, 2000);
+            }
+          }, 1000);
+        } else {
+          setReservationError('Impossible d\'ouvrir la page de paiement. Veuillez autoriser les popups.');
+        }
+      } else {
+        throw new Error(paymentResult.error || 'Échec de l\'initialisation du paiement mobile money');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors du paiement mobile money:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors du paiement mobile money';
+      setReservationError(errorMessage);
+    }
   };
   
   const handlePayment = async (paymentMethod: string, transactionId: string) => {

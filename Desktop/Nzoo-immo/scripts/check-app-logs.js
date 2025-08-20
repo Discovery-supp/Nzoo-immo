@@ -46,3 +46,4 @@ console.log('💡 Conseil :');
 console.log('Comparez les logs de l\'application avec ceux du script de test');
 console.log('qui fonctionne : node scripts/test-app-exact.js test@example.com');
 
+

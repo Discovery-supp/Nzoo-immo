@@ -333,3 +333,4 @@ export const testAutoUpdateLogic = (): void => {
 
   console.log('\n✅ Tests de logique terminés');
 };
+

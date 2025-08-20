@@ -145,3 +145,4 @@ initializeSpacesDatabase()
     console.error('❌ Erreur fatale:', error);
     process.exit(1);
   });
+

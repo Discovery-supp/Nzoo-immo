@@ -286,6 +286,28 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   const safeDisplayedClients = displayedClients || [];
   const safeClients = clients || [];
 
+  // Référence pour le conteneur de navigation
+  const navRef = React.useRef<HTMLDivElement>(null);
+
+  // Fonction pour faire défiler vers l'onglet actif
+  const scrollToActiveTab = () => {
+    if (navRef.current) {
+      const activeButton = navRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement;
+      if (activeButton) {
+        activeButton.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  };
+
+  // Faire défiler vers l'onglet actif quand il change
+  useEffect(() => {
+    scrollToActiveTab();
+  }, [activeTab]);
+
   const translations = {
     fr: {
       title: 'Tableau de Bord Administrateur',
@@ -2028,18 +2050,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
         {/* Navigation Tabs avec design moderne */}
         <div className="mb-8">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-            <nav className="flex space-x-1 p-2">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden relative">
+            {/* Indicateur de défilement gauche */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white/80 to-transparent z-10 pointer-events-none rounded-l-3xl"></div>
+            
+            {/* Indicateur de défilement droit */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/80 to-transparent z-10 pointer-events-none rounded-r-3xl"></div>
+            
+            <nav ref={navRef} className="flex space-x-1 p-2 overflow-x-auto scrollbar-hide scroll-smooth">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
+                    data-tab={tab.id}
                     onClick={() => {
                       console.log('🖱️ Clic sur l\'onglet:', tab.id);
                       setActiveTab(tab.id);
                     }}
-                    className={`flex-1 whitespace-nowrap py-4 px-6 rounded-2xl font-medium text-sm flex items-center justify-center space-x-2 transition-all duration-300 font-poppins ${
+                    className={`flex-shrink-0 whitespace-nowrap py-4 px-6 rounded-2xl font-medium text-sm flex items-center justify-center space-x-2 transition-all duration-300 font-poppins min-w-fit hover:scale-105 ${
                       activeTab === tab.id
                         ? 'bg-gradient-to-r from-nzoo-dark to-nzoo-dark text-white shadow-lg transform scale-105'
                         : 'text-nzoo-dark/60 hover:text-nzoo-dark hover:bg-white/50 hover:shadow-soft'

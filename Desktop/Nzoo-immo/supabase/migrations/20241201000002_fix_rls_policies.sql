@@ -27,3 +27,4 @@ BEGIN
     RAISE NOTICE 'Politiques RLS corrigées pour la table spaces_content';
     RAISE NOTICE 'L''application peut maintenant insérer et mettre à jour les données';
 END $$;
+

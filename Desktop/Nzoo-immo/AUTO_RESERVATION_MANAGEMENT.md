@@ -180,3 +180,4 @@ Le système est prêt à être utilisé en production avec :
 - Documentation détaillée
 
 Les nouvelles règles d'annulation automatique sont maintenant opérationnelles ! 🎉
+

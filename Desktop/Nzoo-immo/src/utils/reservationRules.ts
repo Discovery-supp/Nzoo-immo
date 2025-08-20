@@ -234,3 +234,4 @@ export const getRulesSummary = (language: 'fr' | 'en') => {
 
   return summaries[language];
 };
+

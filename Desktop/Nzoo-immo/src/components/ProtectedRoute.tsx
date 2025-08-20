@@ -34,3 +34,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isAuthenticat
 };
 
 export default ProtectedRoute;
+

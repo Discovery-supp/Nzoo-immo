@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Save, X, Upload, Image, DollarSign, FileText, Eye, Plus, RotateCcw } from 'lucide-react';
+import { Edit, Save, X, Upload, Image, DollarSign, FileText, Eye, Plus, RotateCcw, Loader2 } from 'lucide-react';
 import { getAllSpaces, getDefaultSpaces } from '../data/spacesData';
 import { SpaceContentService } from '../services/spaceContentService';
+import { ImageUploadService } from '../services/imageUploadService';
 
 interface SpaceContentEditorProps {
   language: 'fr' | 'en';
@@ -26,6 +27,7 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
   const [spaceData, setSpaceData] = useState<Record<string, SpaceContent>>({});
   const [originalData, setOriginalData] = useState<Record<string, SpaceContent>>({});
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [hasModifications, setHasModifications] = useState(false);
 
@@ -101,21 +103,75 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
     }
   };
 
+  const addNewSpace = () => {
+    const spaceName = prompt('Nom du nouvel espace (ex: salle-reunion, bureau-individuel):');
+    if (!spaceName || !spaceName.trim()) return;
+
+    const spaceKey = spaceName.trim().toLowerCase().replace(/\s+/g, '-');
+    
+    // Vérifier si l'espace existe déjà
+    if (spaceData[spaceKey]) {
+      setMessage({ type: 'error', text: 'Un espace avec ce nom existe déjà' });
+      return;
+    }
+
+    // Créer le nouvel espace
+    const newSpace: SpaceContent = {
+      title: spaceName.trim(),
+      description: 'Description du nouvel espace',
+      features: ['Équipement 1', 'Équipement 2'],
+      dailyPrice: 50,
+      monthlyPrice: 1000,
+      yearlyPrice: 10000,
+      maxOccupants: 5
+    };
+
+    setSpaceData(prev => ({
+      ...prev,
+      [spaceKey]: newSpace
+    }));
+
+    setMessage({ type: 'success', text: `Nouvel espace "${spaceName}" ajouté avec succès` });
+  };
+
   const removeFeature = (spaceKey: string, index: number) => {
     const updatedFeatures = spaceData[spaceKey].features.filter((_, i) => i !== index);
     updateSpaceField(spaceKey, 'features', updatedFeatures);
   };
 
-  const handleImageUpload = (spaceKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (spaceKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          updateSpaceField(spaceKey, 'imageUrl', event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Valider le fichier
+    const validation = ImageUploadService.validateImageFile(file);
+    if (!validation.valid) {
+      setMessage({ type: 'error', text: validation.error || 'Erreur de validation' });
+      return;
+    }
+
+    setImageUploading(spaceKey);
+    setMessage(null);
+
+    try {
+      // Essayer d'uploader vers Supabase Storage
+      const imageUrl = await ImageUploadService.uploadImage(file, spaceKey);
+      
+      if (imageUrl) {
+        // Succès : utiliser l'URL de Supabase
+        updateSpaceField(spaceKey, 'imageUrl', imageUrl);
+        setMessage({ type: 'success', text: 'Image uploadée avec succès vers le serveur' });
+      } else {
+        // Fallback : utiliser base64
+        const base64Url = await ImageUploadService.imageToBase64(file);
+        updateSpaceField(spaceKey, 'imageUrl', base64Url);
+        setMessage({ type: 'success', text: 'Image sauvegardée localement (upload serveur échoué)' });
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'upload d\'image:', error);
+      setMessage({ type: 'error', text: 'Erreur lors de l\'upload de l\'image' });
+    } finally {
+      setImageUploading(null);
     }
   };
 
@@ -198,6 +254,14 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
               )}
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={addNewSpace}
+                className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm"
+                title="Ajouter un nouvel espace"
+              >
+                <Plus className="w-4 h-4" />
+                Ajouter un espace
+              </button>
               {hasModifications && (
                 <button
                   onClick={handleResetToDefault}
@@ -295,10 +359,18 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
                         />
                         <label
                           htmlFor={`image-${spaceKey}`}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer"
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
+                            imageUploading === spaceKey
+                              ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          }`}
                         >
-                          <Upload className="w-4 h-4" />
-                          {t.uploadImage}
+                          {imageUploading === spaceKey ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4" />
+                          )}
+                          {imageUploading === spaceKey ? 'Upload en cours...' : t.uploadImage}
                         </label>
                       </div>
                     </div>
