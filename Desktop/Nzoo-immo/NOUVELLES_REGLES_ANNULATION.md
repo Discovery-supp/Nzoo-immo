@@ -88,4 +88,3 @@ Votre système d'annulation automatique est maintenant opérationnel avec les **
 3. **12h** pour annuler les réservations en attente expirées
 
 Le système est prêt à être utilisé ! 🚀
-

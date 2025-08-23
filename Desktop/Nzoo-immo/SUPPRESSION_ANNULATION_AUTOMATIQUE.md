@@ -87,4 +87,3 @@ Les utilisateurs peuvent toujours :
 ## 🎉 **Conclusion**
 
 La suppression de la logique d'annulation automatique a été effectuée avec succès. L'application est maintenant plus simple et ne dépend que des actions manuelles des utilisateurs pour la gestion des réservations.
-

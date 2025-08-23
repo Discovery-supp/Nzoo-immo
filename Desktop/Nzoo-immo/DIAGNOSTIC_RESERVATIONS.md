@@ -102,4 +102,3 @@ Si l'interface ne se rend pas :
 - ✅ **Références** : Nettoyées
 - 🔍 **Diagnostic** : En cours
 - ⏳ **Résolution** : En attente des tests
-

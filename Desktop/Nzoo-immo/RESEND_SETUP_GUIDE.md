@@ -150,4 +150,3 @@ Une fois configuré, vos emails de réservation fonctionneront parfaitement ! �
 
 
 
-
