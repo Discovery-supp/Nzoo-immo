@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://nzoo.immo/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /client-profile
+Disallow: /auth/callback
+Disallow: /toast-demo
+
+# Allow important pages
+Allow: /
+Allow: /spaces
+Allow: /reservation/
+Allow: /login
+Allow: /signup
+Allow: /en/
+Allow: /en/spaces
+Allow: /en/reservation/
+
+# Crawl delay (optional)
+Crawl-delay: 1
