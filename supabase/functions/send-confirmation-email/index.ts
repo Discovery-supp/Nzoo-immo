@@ -6,6 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey",
 }
 
+
+
+
 interface EmailRequest {
   to: string
   subject: string
