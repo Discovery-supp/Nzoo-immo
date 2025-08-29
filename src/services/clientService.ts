@@ -1,6 +1,14 @@
-import { supabase } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
+import { sendWelcomeEmailWithCredentials } from './emailServiceUnified';
 
+// Configuration Supabase
+const supabaseUrl = 'https://nnkywmfxoohehtyyzzgp.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk';
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Interface pour les données d'inscription client
 export interface ClientSignupData {
   fullName: string;
   email: string;
@@ -9,11 +17,13 @@ export interface ClientSignupData {
   password: string;
 }
 
+// Interface pour les données de connexion client
 export interface ClientLoginData {
   email: string;
   password: string;
 }
 
+// Interface pour l'utilisateur client
 export interface ClientUser {
   id: string;
   username: string;
@@ -40,6 +50,8 @@ const verifyPassword = async (password: string, hash: string): Promise<boolean> 
 // Fonction pour inscrire un nouveau client
 export const signupClient = async (data: ClientSignupData): Promise<ClientUser> => {
   try {
+    console.log('👤 [CLIENT] Début inscription client:', data.email);
+
     // Vérifier si l'email existe déjà
     const { data: existingUser, error: checkError } = await supabase
       .from('admin_users')
@@ -78,8 +90,31 @@ export const signupClient = async (data: ClientSignupData): Promise<ClientUser> 
       .single();
 
     if (insertError) {
-      console.error('Erreur lors de l\'insertion:', insertError);
+      console.error('❌ [CLIENT] Erreur lors de l\'insertion:', insertError);
       throw new Error('Erreur lors de la création du compte');
+    }
+
+    console.log('✅ [CLIENT] Compte client créé avec succès:', newUser.id);
+
+    // Envoyer l'email de bienvenue
+    try {
+      console.log('📧 [CLIENT] Envoi email de bienvenue...');
+      const emailResult = await sendWelcomeEmailWithCredentials({
+        email: data.email,
+        full_name: data.fullName,
+        phone: data.phone,
+        company: data.company,
+        password: data.password // Envoyer le mot de passe en clair pour l'email
+      });
+
+      if (emailResult.success) {
+        console.log('✅ [CLIENT] Email de bienvenue envoyé avec succès');
+      } else {
+        console.warn('⚠️ [CLIENT] Email de bienvenue non envoyé:', emailResult.error);
+      }
+    } catch (emailError) {
+      console.error('❌ [CLIENT] Erreur envoi email de bienvenue:', emailError);
+      // L'email n'est pas critique, on continue
     }
 
     // Retourner les données du client (sans le mot de passe)
@@ -96,7 +131,7 @@ export const signupClient = async (data: ClientSignupData): Promise<ClientUser> 
     };
 
   } catch (error) {
-    console.error('Erreur lors de l\'inscription:', error);
+    console.error('❌ [CLIENT] Erreur lors de l\'inscription:', error);
     throw error;
   }
 };
@@ -104,6 +139,8 @@ export const signupClient = async (data: ClientSignupData): Promise<ClientUser> 
 // Fonction pour connecter un utilisateur (client, admin, ou user)
 export const loginClient = async (data: ClientLoginData): Promise<ClientUser> => {
   try {
+    console.log('🔐 [CLIENT] Tentative de connexion:', data.email);
+
     // Récupérer l'utilisateur par email (tous les rôles)
     const { data: user, error: fetchError } = await supabase
       .from('admin_users')
@@ -138,6 +175,8 @@ export const loginClient = async (data: ClientLoginData): Promise<ClientUser> =>
       throw new Error('Email ou mot de passe incorrect');
     }
 
+    console.log('✅ [CLIENT] Connexion réussie:', user.email);
+
     // Retourner les données de l'utilisateur (sans le mot de passe)
     return {
       id: user.id,
@@ -152,7 +191,7 @@ export const loginClient = async (data: ClientLoginData): Promise<ClientUser> =>
     };
 
   } catch (error) {
-    console.error('Erreur lors de la connexion:', error);
+    console.error('❌ [CLIENT] Erreur lors de la connexion:', error);
     throw error;
   }
 };

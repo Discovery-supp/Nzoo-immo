@@ -372,6 +372,45 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
           }
         }
       }
+
+      // Envoyer un email d'annulation si le statut passe à "cancelled"
+      if (newStatus === 'cancelled') {
+        const reservation = reservations.find(r => r.id === reservationId);
+        if (reservation) {
+          try {
+            console.log('📧 Envoi automatique d\'email d\'annulation pour la réservation:', reservationId);
+            
+            const emailResult = await sendConfirmationEmail({
+              to: reservation.email,
+              subject: `Annulation de votre réservation - ${reservation.full_name}`,
+              reservationData: {
+                fullName: reservation.full_name,
+                email: reservation.email,
+                phone: reservation.phone,
+                company: reservation.company || undefined,
+                activity: reservation.activity || '',
+                spaceType: reservation.space_type,
+                startDate: reservation.start_date,
+                endDate: reservation.end_date,
+                amount: reservation.amount,
+                transactionId: reservation.id,
+                status: newStatus
+              }
+            });
+
+            if (emailResult.emailSent) {
+              console.log('✅ Email d\'annulation envoyé avec succès');
+              showNotification('success', 'Email d\'annulation envoyé automatiquement au client');
+            } else {
+              console.error('❌ Erreur lors de l\'envoi automatique de l\'email d\'annulation:', emailResult.error);
+              showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email d\'annulation');
+            }
+          } catch (emailError) {
+            console.error('❌ Erreur lors de l\'envoi automatique de l\'email d\'annulation:', emailError);
+            showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email d\'annulation');
+          }
+        }
+      }
     } catch (error) {
       console.error('Erreur lors du changement de statut:', error);
       showNotification('error', t.statusUpdateError);
