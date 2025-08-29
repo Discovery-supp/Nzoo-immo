@@ -51,7 +51,7 @@ async function sendEmailDirect(to: string, subject: string, html: string, userDa
   }
 }
 
-// Template d'email professionnel avec logo
+// Template d'email professionnel avec logo Nzoo Immo
 const createWelcomeEmailTemplate = (content: string) => {
   return `
     <!DOCTYPE html>
@@ -90,22 +90,21 @@ const createWelcomeEmailTemplate = (content: string) => {
                 color: white;
             }
             
-            .logo {
-                font-size: 28px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            .logo-container {
+                margin-bottom: 15px;
             }
             
-            .logo-icon {
-                font-size: 32px;
-                margin-right: 10px;
+            .logo {
+                max-width: 200px;
+                height: auto;
+                filter: brightness(0) invert(1);
             }
             
             .tagline {
-                font-size: 14px;
-                opacity: 0.9;
+                font-size: 16px;
+                opacity: 0.95;
                 font-style: italic;
+                margin-top: 10px;
             }
             
             .content {
@@ -228,6 +227,12 @@ const createWelcomeEmailTemplate = (content: string) => {
                 margin-bottom: 15px;
             }
             
+            .contact-phone {
+                color: #667eea;
+                font-weight: 600;
+                text-decoration: none;
+            }
+            
             .social-links {
                 margin-top: 15px;
             }
@@ -255,6 +260,10 @@ const createWelcomeEmailTemplate = (content: string) => {
                     padding: 20px 15px;
                 }
                 
+                .logo {
+                    max-width: 150px;
+                }
+                
                 .credential-row {
                     flex-direction: column;
                     align-items: flex-start;
@@ -277,9 +286,10 @@ const createWelcomeEmailTemplate = (content: string) => {
     <body>
         <div class="email-container">
             <div class="header">
-                <div class="logo">
-                    <span class="logo-icon">🏢</span>
-                    Nzoo Immo
+                <div class="logo-container">
+                    <img src="https://nnkywmfxoohehtyyzzgp.supabase.co/storage/v1/object/public/nzoo-immo-bucket/logo_nzooimmo.svg" 
+                         alt="Nzoo Immo" 
+                         class="logo">
                 </div>
                 <div class="tagline">Votre partenaire immobilier de confiance à Kinshasa</div>
             </div>
@@ -294,7 +304,8 @@ const createWelcomeEmailTemplate = (content: string) => {
                         <strong>Nzoo Immo</strong><br>
                         📍 Kinshasa, République Démocratique du Congo<br>
                         📧 contact@nzooimmo.com<br>
-                        📞 +243 XXX XXX XXX
+                        📞 <a href="tel:+243893796306" class="contact-phone">+243 893 796 306</a><br>
+                        📞 <a href="tel:+243827323686" class="contact-phone">+243 827 323 686</a>
                     </div>
                     <div class="social-links">
                         <a href="#" class="social-link">Facebook</a> |
