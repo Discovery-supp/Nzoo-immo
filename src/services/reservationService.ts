@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient';
 import { ReservationData, ReservationResult } from '../types';
+import { sendReservationEmails } from './emailServiceDirect';
 
 // Configuration des emails d'administration
 const ADMIN_EMAILS = [
@@ -59,8 +60,8 @@ export const createReservation = async (data: ReservationData): Promise<Reservat
 
     // Envoyer les emails de confirmation
     try {
-      await sendReservationEmails(reservation);
-      console.log('✅ [RESERVATION] Emails envoyés avec succès');
+      const emailResult = await sendReservationEmails(reservation);
+      console.log('✅ [RESERVATION] Emails traités:', emailResult);
     } catch (emailError) {
       console.error('⚠️ [RESERVATION] Erreur envoi emails:', emailError);
       // Ne pas faire échouer la réservation si les emails échouent
@@ -69,99 +70,15 @@ export const createReservation = async (data: ReservationData): Promise<Reservat
     return {
       success: true,
       reservation,
-      message: 'Réservation créée avec succès'
+      error: undefined
     };
 
   } catch (error) {
     console.error('❌ [RESERVATION] Erreur générale:', error);
     return {
       success: false,
-      reservation: null,
-      message: error instanceof Error ? error.message : 'Erreur inconnue'
+      reservation: undefined,
+      error: error instanceof Error ? error.message : 'Erreur inconnue'
     };
-  }
-};
-
-// Fonction pour envoyer les emails de réservation
-const sendReservationEmails = async (reservation: any) => {
-  console.log('📧 [EMAIL] Début envoi emails pour réservation:', reservation.id);
-
-  try {
-    // Email de confirmation client
-    await sendClientConfirmationEmail(reservation);
-    
-    // Email de notification admin
-    await sendAdminNotificationEmail(reservation);
-    
-    console.log('✅ [EMAIL] Tous les emails envoyés avec succès');
-  } catch (error) {
-    console.error('❌ [EMAIL] Erreur envoi emails:', error);
-    throw error;
-  }
-};
-
-// Email de confirmation client
-const sendClientConfirmationEmail = async (reservation: any) => {
-  console.log('📧 [EMAIL] Envoi confirmation client:', reservation.email);
-
-  const { data, error } = await supabase.functions.invoke('send-confirmation-email', {
-    body: {
-      to: reservation.email,
-      subject: `Réservation confirmée - ${reservation.transaction_id}`,
-      html: `
-        <h1>Réservation confirmée</h1>
-        <p>Bonjour ${reservation.full_name},</p>
-        <p>Votre réservation a été confirmée avec succès.</p>
-        <p><strong>Référence:</strong> ${reservation.transaction_id}</p>
-        <p><strong>Espace:</strong> ${reservation.space_type}</p>
-        <p><strong>Dates:</strong> ${reservation.start_date} à ${reservation.end_date}</p>
-        <p><strong>Montant:</strong> ${reservation.amount} FC</p>
-        <p>Merci de votre confiance !</p>
-      `,
-      reservationData: reservation
-    }
-  });
-
-  if (error) {
-    console.error('❌ [EMAIL] Erreur email client:', error);
-    throw new Error(`Erreur envoi email client: ${error.message}`);
-  }
-
-  console.log('✅ [EMAIL] Email client envoyé:', data);
-};
-
-// Email de notification admin
-const sendAdminNotificationEmail = async (reservation: any) => {
-  console.log('📧 [EMAIL] Envoi notification admin');
-
-  for (const adminEmail of ADMIN_EMAILS) {
-    try {
-      const { data, error } = await supabase.functions.invoke('send-confirmation-email', {
-        body: {
-          to: adminEmail,
-          subject: `Nouvelle réservation - ${reservation.transaction_id}`,
-          html: `
-            <h1>Nouvelle réservation</h1>
-            <p>Une nouvelle réservation a été créée.</p>
-            <p><strong>Client:</strong> ${reservation.full_name}</p>
-            <p><strong>Email:</strong> ${reservation.email}</p>
-            <p><strong>Téléphone:</strong> ${reservation.phone}</p>
-            <p><strong>Espace:</strong> ${reservation.space_type}</p>
-            <p><strong>Dates:</strong> ${reservation.start_date} à ${reservation.end_date}</p>
-            <p><strong>Montant:</strong> ${reservation.amount} FC</p>
-            <p><strong>Référence:</strong> ${reservation.transaction_id}</p>
-          `,
-          reservationData: reservation
-        }
-      });
-
-      if (error) {
-        console.error(`❌ [EMAIL] Erreur email admin ${adminEmail}:`, error);
-      } else {
-        console.log(`✅ [EMAIL] Email admin envoyé à ${adminEmail}:`, data);
-      }
-    } catch (error) {
-      console.error(`❌ [EMAIL] Erreur générale email admin ${adminEmail}:`, error);
-    }
   }
 };
