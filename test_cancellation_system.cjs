@@ -266,7 +266,8 @@ const createCancellationEmailTemplate = (content) => {
                 <div class="footer-content">
                     <div class="contact-info">
                         <strong>Nzoo Immo</strong><br>
-                        📍 Kinshasa, République Démocratique du Congo<br>
+                        📍 16, colonel Lukusa, Commune de la Gombe<br>
+📍 Kinshasa, République Démocratique du Congo<br>
                         📧 contact@nzooimmo.com<br>
                         📞 <a href="tel:+243893796306" class="contact-phone">+243 893 796 306</a><br>
                         📞 <a href="tel:+243827323686" class="contact-phone">+243 827 323 686</a>

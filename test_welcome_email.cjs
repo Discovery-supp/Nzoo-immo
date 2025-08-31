@@ -281,7 +281,8 @@ const createWelcomeEmailTemplate = (content) => {
                 <div class="footer-content">
                     <div class="contact-info">
                         <strong>Nzoo Immo</strong><br>
-                        📍 Kinshasa, République Démocratique du Congo<br>
+                        📍 16, colonel Lukusa, Commune de la Gombe<br>
+📍 Kinshasa, République Démocratique du Congo<br>
                         📧 contact@nzooimmo.com<br>
                         📞 +243 XXX XXX XXX
                     </div>

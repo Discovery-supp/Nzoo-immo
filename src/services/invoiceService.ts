@@ -160,20 +160,23 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
           position: absolute;
           top: 20px;
           left: 30px;
-          width: 80px;
-          height: 80px;
-          background: #000000;
-          border-radius: 10px;
-          padding: 10px;
+          width: 120px;
+          height: 120px;
+          background: white;
+          border: 3px solid white;
+          border-radius: 15px;
+          padding: 15px;
           display: flex;
           align-items: center;
           justify-content: center;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
         .logo img {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
+          border-radius: 8px;
         }
         
         .header h1 {
@@ -385,6 +388,16 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
             margin: 0;
             border-radius: 0;
           }
+          
+          .logo {
+            background: white !important;
+            border: 2px solid #183154 !important;
+            box-shadow: none !important;
+          }
+          
+          .logo img {
+            filter: contrast(1.2) brightness(1.1);
+          }
         }
       </style>
     </head>
@@ -402,7 +415,8 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
           <div class="company-info">
             <h3>Émetteur</h3>
             <div class="info-item"><strong>N'zoo Immo</strong></div>
-            <div class="info-item">République Démocratique du Congo (Kinshasa)</div>
+            <div class="info-item">16, colonel Lukusa, Commune de la Gombe</div>
+            <div class="info-item">Kinshasa, République Démocratique du Congo</div>
             <div class="info-item">Tél: +243822201758</div>
             <div class="info-item">Email: contact@nzoo-immo.com</div>
           </div>
@@ -435,6 +449,10 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
                   ${status === 'confirmed' ? 'Confirmé' : 'Réservé'}
                 </span>
               </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Type d'Abonnement</div>
+              <div class="detail-value">${data.subscriptionType || 'Standard'}</div>
             </div>
           </div>
         </div>
@@ -515,7 +533,8 @@ export const generateAndDownloadReservationInvoice = async (reservationData: Res
     // Informations de l'entreprise
     const companyInfo = {
       name: "N'zoo Immo",
-      address: "République Démocratique du Congo (Kinshasa)",
+      address: "16, colonel Lukusa, Commune de la Gombe",
+      city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com",
       logo: "/logo.jpg"
@@ -606,21 +625,23 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
           position: absolute;
           top: 20px;
           left: 30px;
-          width: 80px;
-          height: 80px;
+          width: 120px;
+          height: 120px;
           background: #ffffff;
-          border-radius: 10px;
-          padding: 10px;
+          border-radius: 15px;
+          padding: 15px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid #183154;
+          border: 3px solid #183154;
+          box-shadow: 0 4px 15px rgba(24, 49, 84, 0.2);
         }
         
         .logo img {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
+          border-radius: 8px;
         }
         
         .header h1 {
@@ -860,6 +881,7 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
             <h3>Émetteur</h3>
             <div class="info-item"><strong>${companyInfo.name}</strong></div>
             <div class="info-item">${companyInfo.address}</div>
+            <div class="info-item">${companyInfo.city}</div>
             <div class="info-item">Tél: ${companyInfo.phone}</div>
             <div class="info-item">Email: ${companyInfo.email}</div>
           </div>
@@ -897,6 +919,10 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
                 </span>
               </div>
             </div>
+            <div class="detail-item">
+              <div class="detail-label">Type d'Abonnement</div>
+              <div class="detail-value">${reservation.subscription_type || 'Standard'}</div>
+            </div>
           </div>
         </div>
         
@@ -930,23 +956,7 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
           </table>
         </div>
         
-        <div class="payment-info">
-          <h4>Informations de Paiement</h4>
-          <div class="payment-details">
-            <div class="payment-detail">
-              <strong>Méthode:</strong> ${formatPaymentMethod(reservation.payment_method)}
-            </div>
-            <div class="payment-detail">
-              <strong>Transaction ID:</strong> ${reservation.transaction_id || 'N/A'}
-            </div>
-            <div class="payment-detail">
-              <strong>Date de réservation:</strong> ${new Date(reservation.created_at).toLocaleDateString('fr-FR')}
-            </div>
-            <div class="payment-detail">
-              <strong>Type d'abonnement:</strong> ${reservation.subscription_type || 'Standard'}
-            </div>
-          </div>
-        </div>
+
         
         <div class="total-section">
           <div class="total-row">
@@ -985,7 +995,8 @@ export const generateAndDownloadInvoice = async (reservation: Reservation): Prom
     // Informations de l'entreprise
     const companyInfo = {
       name: "N'zoo Immo",
-      address: "République Démocratique du Congo (Kinshasa)",
+      address: "16, colonel Lukusa, Commune de la Gombe",
+      city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com",
       logo: "/logo.jpg" // Chemin vers le logo JPG dans public
@@ -1047,7 +1058,8 @@ export const generatePDFInvoice = async (reservation: Reservation): Promise<void
     // Informations de l'entreprise
     const companyInfo = {
       name: "N'zoo Immo",
-      address: "République Démocratique du Congo (Kinshasa)",
+      address: "16, colonel Lukusa, Commune de la Gombe",
+      city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com"
     };
@@ -1078,8 +1090,9 @@ export const generatePDFInvoice = async (reservation: Reservation): Promise<void
     doc.setFontSize(10);
     doc.text(companyInfo.name, 20, 70);
     doc.text(companyInfo.address, 20, 75);
-    doc.text(`Tél: ${companyInfo.phone}`, 20, 80);
-    doc.text(`Email: ${companyInfo.email}`, 20, 85);
+    doc.text(companyInfo.city, 20, 80);
+    doc.text(`Tél: ${companyInfo.phone}`, 20, 85);
+    doc.text(`Email: ${companyInfo.email}`, 20, 90);
     
     // Informations du client
     doc.setFontSize(14);
@@ -1106,29 +1119,30 @@ export const generatePDFInvoice = async (reservation: Reservation): Promise<void
     doc.text(`Numéro: ${invoiceNumber}`, 20, 120);
     doc.text(`Date: ${dates.createdDate}`, 20, 125);
     doc.text(`Statut: ${reservation.status}`, 20, 130);
+    doc.text(`Type d'abonnement: ${reservation.subscription_type || 'Standard'}`, 20, 135);
     
     // Services
     doc.setFontSize(14);
-    doc.text('Services Facturés:', 20, 155);
+    doc.text('Services Facturés:', 20, 160);
     
     doc.setFontSize(10);
-    doc.text(`Service: ${formatSpaceType(reservation.space_type)}`, 20, 165);
-    doc.text(`Période: Du ${dates.startDate} au ${dates.endDate}`, 20, 170);
-    doc.text(`Occupants: ${reservation.occupants} personne${reservation.occupants > 1 ? 's' : ''}`, 20, 175);
-    doc.text(`Méthode de paiement: ${formatPaymentMethod(reservation.payment_method)}`, 20, 180);
+    doc.text(`Service: ${formatSpaceType(reservation.space_type)}`, 20, 170);
+    doc.text(`Période: Du ${dates.startDate} au ${dates.endDate}`, 20, 175);
+    doc.text(`Occupants: ${reservation.occupants} personne${reservation.occupants > 1 ? 's' : ''}`, 20, 180);
+    doc.text(`Méthode de paiement: ${formatPaymentMethod(reservation.payment_method)}`, 20, 185);
     
     // Total
     doc.setFontSize(14);
-    doc.text('Total:', 20, 195);
+    doc.text('Total:', 20, 200);
     doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text(`$${reservation.amount}`, 120, 195);
+    doc.text(`$${reservation.amount}`, 120, 200);
     
     // Pied de page
     doc.setFontSize(8);
     doc.setTextColor(...secondaryColor);
-    doc.text('Merci pour votre confiance !', 105, 250, { align: 'center' });
-    doc.text("N'zoo Immo - Votre partenaire pour des espaces de travail modernes et flexibles", 105, 255, { align: 'center' });
+    doc.text('Merci pour votre confiance !', 105, 255, { align: 'center' });
+    doc.text("N'zoo Immo - Votre partenaire pour des espaces de travail modernes et flexibles", 105, 260, { align: 'center' });
     
     // Télécharger le PDF
     const fileName = `Facture_${invoiceNumber}_${reservation.full_name.replace(/\s+/g, '_')}.pdf`;

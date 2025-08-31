@@ -28,7 +28,7 @@ async function createTestReservation() {
     phone: '+243123456789',
     company: 'Test Company',
     activity: 'Développement web',
-    address: 'Kinshasa, RDC',
+    address: '16, colonel Lukusa, Commune de la Gombe, Kinshasa, RDC',
     space_type: 'coworking',
     start_date: '2024-01-15',
     end_date: '2024-01-20',
