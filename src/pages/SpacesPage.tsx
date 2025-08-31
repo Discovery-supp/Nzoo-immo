@@ -55,6 +55,8 @@ const SpacesPage: React.FC<SpacesPageProps> = ({ language }) => {
         loading: 'Chargement...',
         includedEquipment: 'Équipements inclus',
         viewDetails: 'Voir les détails',
+        unavailable: 'Indisponible',
+        unavailableMessage: 'Cet espace n\'est actuellement pas disponible pour la réservation.',
         readyToStart: 'Prêt à commencer ?',
         readyToReserve: 'Prêt à réserver votre espace ?',
         chooseSpace: 'Choisissez l\'espace qui correspond le mieux à vos besoins et réservez en quelques clics.',
@@ -68,6 +70,8 @@ const SpacesPage: React.FC<SpacesPageProps> = ({ language }) => {
         loading: 'Loading...',
         includedEquipment: 'Included equipment',
         viewDetails: 'View details',
+        unavailable: 'Unavailable',
+        unavailableMessage: 'This space is currently not available for reservation.',
         readyToStart: 'Ready to start?',
         readyToReserve: 'Ready to reserve your space?',
         chooseSpace: 'Choose the space that best suits your needs and book in just a few clicks.',
@@ -296,12 +300,23 @@ const SpacesPage: React.FC<SpacesPageProps> = ({ language }) => {
                       <img
                         src={space.imageUrl || `/images/spaces/${spaceKey}.jpg`}
                         alt={space.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className={`w-full h-full object-cover transition-transform duration-500 ${
+                          space.isAvailable ? 'group-hover:scale-110' : 'grayscale opacity-60'
+                        }`}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }}
                       />
+                      
+                      {/* Indicateur d'indisponibilité */}
+                      {!space.isAvailable && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                            {t.unavailable}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}
@@ -342,21 +357,32 @@ const SpacesPage: React.FC<SpacesPageProps> = ({ language }) => {
                       </div>
                       
                                               {/* View Details Button - Redirige vers la page de réservation spécifique */}
-                       <Link
-                         to={`/reservation/${spaceKey}`}
-                         className={`group block text-white text-center py-4 rounded-2xl transition-all duration-500 font-bold text-lg hover:shadow-2xl transform hover:scale-105 ${
-                           color === 'primary' ? 'bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-600 hover:to-primary-500' :
-                           color === 'nzoo-dark' ? 'bg-gradient-to-r from-nzoo-dark to-nzoo-dark-light hover:from-nzoo-dark-light hover:to-nzoo-dark-lighter' :
-                           color === 'primary-light' ? 'bg-gradient-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400' :
-                           color === 'primary-400' ? 'bg-gradient-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400' :
-                           color === 'primary-300' ? 'bg-gradient-to-r from-primary-300 to-primary-200 hover:from-primary-400 hover:to-primary-300' :
-                           'bg-gradient-to-r from-primary-200 to-primary-100 hover:from-primary-300 hover:to-primary-200'
-                         }`}
-                       >
-                         <span className="flex items-center justify-center space-x-3">
-                           <span>{t.viewDetails}</span>
-                         </span>
-                       </Link>
+                      {space.isAvailable ? (
+                        <Link
+                          to={`/reservation/${spaceKey}`}
+                          className={`group block text-white text-center py-4 rounded-2xl transition-all duration-500 font-bold text-lg hover:shadow-2xl transform hover:scale-105 ${
+                            color === 'primary' ? 'bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-600 hover:to-primary-500' :
+                            color === 'nzoo-dark' ? 'bg-gradient-to-r from-nzoo-dark to-nzoo-dark-light hover:from-nzoo-dark-light hover:to-nzoo-dark-lighter' :
+                            color === 'primary-light' ? 'bg-gradient-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400' :
+                            color === 'primary-400' ? 'bg-gradient-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:from-primary-400' :
+                            color === 'primary-300' ? 'bg-gradient-to-r from-primary-300 to-primary-200 hover:from-primary-400 hover:to-primary-300' :
+                            'bg-gradient-to-r from-primary-200 to-primary-100 hover:from-primary-300 hover:to-primary-200'
+                          }`}
+                        >
+                          <span className="flex items-center justify-center space-x-3">
+                            <span>{t.viewDetails}</span>
+                          </span>
+                        </Link>
+                      ) : (
+                        <div className="text-center py-4">
+                          <div className="bg-gray-300 text-gray-600 py-4 px-6 rounded-2xl font-bold text-lg cursor-not-allowed">
+                            {t.unavailable}
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2 font-poppins">
+                            {t.unavailableMessage}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </motion.article>
                 );

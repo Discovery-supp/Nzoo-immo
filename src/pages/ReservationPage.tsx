@@ -217,28 +217,22 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
   // Fonction pour gérer la sélection de dates
   const handleDateSelection = async (value: any) => {
-    if (selectedSpace === 'coworking') {
-      setSelectedDates(value);
-      setAutoSelectDates(false);
+    // Permettre la sélection de plages pour tous les espaces
+    if (value && !Array.isArray(value)) {
+      // Sélection d'une seule date - créer une période d'un mois par défaut
+      const startDate = new Date(value);
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      endDate.setDate(endDate.getDate() - 1);
       
-      if (Array.isArray(value) && value.length === 2) {
-        await checkAvailability(value[0], value[1]);
-      }
-    } else {
-      if (value && !Array.isArray(value)) {
-        const startDate = new Date(value);
-        const endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
-        endDate.setDate(endDate.getDate() - 1);
-        
-        setSelectedDates([startDate, endDate]);
-        setAutoSelectDates(true);
-        await checkAvailability(startDate, endDate);
-      } else if (Array.isArray(value) && value.length === 2) {
-        setSelectedDates(value as [Date, Date]);
-        setAutoSelectDates(false);
-        await checkAvailability(value[0], value[1]);
-      }
+      setSelectedDates([startDate, endDate]);
+      setAutoSelectDates(true);
+      await checkAvailability(startDate, endDate);
+    } else if (Array.isArray(value) && value.length === 2) {
+      // Sélection d'une plage de dates
+      setSelectedDates(value as [Date, Date]);
+      setAutoSelectDates(false);
+      await checkAvailability(value[0], value[1]);
     }
   };
 
@@ -261,6 +255,31 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
     setSuggestedDates([]);
     
     await checkAvailability(startDate, endDate);
+  };
+
+  // Fonction pour sélectionner une période rapide
+  const handleQuickPeriodSelect = async (months: number) => {
+    if (!selectedDates || !Array.isArray(selectedDates) || selectedDates.length === 0) {
+      // Si aucune date n'est sélectionnée, utiliser la date d'aujourd'hui
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + months);
+      endDate.setDate(endDate.getDate() - 1);
+      
+      setSelectedDates([startDate, endDate]);
+      setAutoSelectDates(true);
+      await checkAvailability(startDate, endDate);
+    } else {
+      // Si une date de début est déjà sélectionnée, calculer la fin
+      const startDate = Array.isArray(selectedDates) ? selectedDates[0] : selectedDates;
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + months);
+      endDate.setDate(endDate.getDate() - 1);
+      
+      setSelectedDates([startDate, endDate]);
+      setAutoSelectDates(true);
+      await checkAvailability(startDate, endDate);
+    }
   };
 
   // Fonction pour calculer les jours sélectionnés
@@ -314,6 +333,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         address: 'Adresse Physique',
         occupants: "Nombre d'Occupants",
         period: 'Période Souhaitée',
+        quickPeriods: 'Périodes Rapides',
+        oneMonth: '1 Mois',
+        twoMonths: '2 Mois',
+        threeMonths: '3 Mois',
+        customPeriod: 'Période Personnalisée',
         subscriptionType: "Type d'Abonnement",
         daily: 'Journalier',
         monthly: 'Mensuel',
@@ -377,6 +401,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         address: 'Physical Address',
         occupants: 'Number of Occupants',
         period: 'Desired Period',
+        quickPeriods: 'Quick Periods',
+        oneMonth: '1 Month',
+        twoMonths: '2 Months',
+        threeMonths: '3 Months',
+        customPeriod: 'Custom Period',
         subscriptionType: 'Subscription Type',
         daily: 'Daily',
         monthly: 'Monthly',
@@ -905,35 +934,65 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           </div>
         )}
 
-        {/* Informations spéciales pour les services non-coworking */}
-        {selectedSpace !== 'coworking' && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-300 rounded-2xl">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center mt-1 shadow-soft">
-                <Info className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <p className="font-semibold text-nzoo-dark mb-1 font-body">
-                  {language === 'fr' 
-                    ? "Sélection automatique d'un mois"
-                    : "Automatic one-month selection"}
-                </p>
-                <p className="text-primary-700 font-body">
-                  {language === 'fr'
-                    ? "Sélectionnez une date de début, le système choisira automatiquement une période d'un mois."
-                    : "Select a start date, the system will automatically choose a one-month period."}
-                </p>
-              </div>
-            </div>
+        {/* Sélection rapide des périodes */}
+        <div className="mb-6 p-6 bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-300 rounded-2xl">
+          <div className="text-center mb-4">
+            <h4 className="font-semibold text-nzoo-dark mb-2 font-body">
+              {t.form.quickPeriods}
+            </h4>
+            <p className="text-primary-700 text-sm font-body">
+              {language === 'fr'
+                ? "Sélectionnez rapidement une période ou utilisez le calendrier pour une période personnalisée"
+                : "Quickly select a period or use the calendar for a custom period"}
+            </p>
           </div>
-        )}
+          
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              onClick={() => handleQuickPeriodSelect(1)}
+              className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-soft"
+            >
+              {t.form.oneMonth}
+            </button>
+            <button
+              onClick={() => handleQuickPeriodSelect(2)}
+              className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-soft"
+            >
+              {t.form.twoMonths}
+            </button>
+            <button
+              onClick={() => handleQuickPeriodSelect(3)}
+              className="px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-soft"
+            >
+              {t.form.threeMonths}
+            </button>
+            <button
+              onClick={() => handleQuickPeriodSelect(6)}
+              className="px-6 py-3 bg-nzoo-dark hover:bg-nzoo-dark-light text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-soft"
+            >
+              {language === 'fr' ? '6 Mois' : '6 Months'}
+            </button>
+            <button
+              onClick={() => handleQuickPeriodSelect(12)}
+              className="px-6 py-3 bg-nzoo-dark-light hover:bg-nzoo-dark-lighter text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-soft"
+            >
+              {language === 'fr' ? '1 An' : '1 Year'}
+            </button>
+          </div>
+          
+          <div className="text-center mt-4">
+            <p className="text-primary-600 text-sm font-body">
+              {t.form.customPeriod}
+            </p>
+          </div>
+        </div>
 
         {/* Calendrier */}
         <div className="flex justify-center mb-6">
           <div className="bg-white p-8 rounded-3xl shadow-soft border border-primary-200">
             <ReactCalendar
               onChange={handleDateSelection}
-              selectRange={selectedSpace === 'coworking'}
+              selectRange={true}
               value={selectedDates}
               minDate={new Date()}
               className="rounded-2xl border-0 shadow-none"
