@@ -10,6 +10,7 @@ import { generateAndDownloadReservationInvoice } from '../services/invoiceServic
 import { AuditService } from '../services/auditService';
 import { calculateDaysBetween, calculateTotalPrice } from '../utils/dateUtils';
 import { logger } from '../utils/logger';
+import { useAuth } from '../hooks/useAuth';
 
 
 
@@ -37,6 +38,7 @@ interface SpaceOption {
 }
 
 const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType = 'coworking' }) => {
+  const { user: userProfile, isAuthenticated } = useAuth();
   const [selectedSpace, setSelectedSpace] = useState<string>(spaceType);
   const [showSpaceSelection, setShowSpaceSelection] = useState(false);
   const [selectedDates, setSelectedDates] = useState<[Date, Date] | null>(null);
@@ -149,6 +151,21 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
     checkSpaceGeneralAvailability();
   }, [selectedSpace]);
+
+  // Pré-remplir automatiquement les champs avec les informations de l'utilisateur connecté
+  useEffect(() => {
+    if (isAuthenticated && userProfile) {
+      setFormData(prevData => ({
+        ...prevData,
+        fullName: userProfile.full_name || '',
+        email: userProfile.email || '',
+        phone: userProfile.phone || '',
+        address: userProfile.address || '',
+        company: userProfile.company || '',
+        activity: userProfile.activity || ''
+      }));
+    }
+  }, [isAuthenticated, userProfile]);
 
   // Fonction pour sélectionner un espace
   const handleSpaceSelection = (spaceKey: string) => {
@@ -331,6 +348,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         phone: 'Téléphone',
         email: 'Email',
         address: 'Adresse Physique',
+        autoFilled: 'Pré-rempli automatiquement',
+        modifyInfo: 'Modifier les informations',
         occupants: "Nombre d'Occupants",
         period: 'Période Souhaitée',
         quickPeriods: 'Périodes Rapides',
@@ -399,6 +418,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         phone: 'Phone',
         email: 'Email',
         address: 'Physical Address',
+        autoFilled: 'Auto-filled',
+        modifyInfo: 'Modify information',
         occupants: 'Number of Occupants',
         period: 'Desired Period',
         quickPeriods: 'Quick Periods',
@@ -1113,12 +1134,32 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           <p className="text-xl text-primary-700 leading-relaxed font-body">
             Remplissez vos informations pour finaliser votre réservation
           </p>
+          
+          {/* Message informatif pour les utilisateurs connectés */}
+          {isAuthenticated && userProfile && (
+            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl max-w-2xl mx-auto">
+              <div className="flex items-center justify-center space-x-2 text-green-700">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium font-body">
+                  {language === 'fr' 
+                    ? 'Vos informations ont été pré-remplies automatiquement. Vous pouvez les modifier si nécessaire.'
+                    : 'Your information has been auto-filled. You can modify it if needed.'
+                  }
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div>
             <label className="block text-sm font-semibold text-nzoo-dark mb-3 font-body">
               {t.form.fullName} *
+              {isAuthenticated && userProfile?.full_name && (
+                <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  {t.form.autoFilled}
+                </span>
+              )}
             </label>
             <input
               type="text"
@@ -1134,6 +1175,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           <div>
             <label className="block text-sm font-semibold text-nzoo-dark mb-3 font-body">
               {t.form.activity} *
+              {isAuthenticated && userProfile?.activity && (
+                <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  {t.form.autoFilled}
+                </span>
+              )}
             </label>
             <input
               type="text"
@@ -1149,6 +1195,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           <div>
             <label className="block text-sm font-semibold text-nzoo-dark mb-3 font-body">
               {t.form.company}
+              {isAuthenticated && userProfile?.company && (
+                <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  {t.form.autoFilled}
+                </span>
+              )}
             </label>
             <input
               type="text"
@@ -1163,6 +1214,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           <div>
             <label className="block text-sm font-semibold text-nzoo-dark mb-3 font-body">
               {t.form.phone} *
+              {isAuthenticated && userProfile?.phone && (
+                <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  {t.form.autoFilled}
+                </span>
+              )}
             </label>
             <input
               type="tel"
@@ -1178,6 +1234,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           <div>
             <label className="block text-sm font-semibold text-nzoo-dark mb-3 font-body">
               {t.form.email} *
+              {isAuthenticated && userProfile?.email && (
+                <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  {t.form.autoFilled}
+                </span>
+              )}
             </label>
             <input
               type="email"
@@ -1193,6 +1254,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           <div>
             <label className="block text-sm font-semibold text-nzoo-dark mb-3 font-body">
               {t.form.address}
+              {isAuthenticated && userProfile?.address && (
+                <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  {t.form.autoFilled}
+                </span>
+              )}
             </label>
             <textarea
               name="address"
