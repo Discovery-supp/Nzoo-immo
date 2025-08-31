@@ -648,7 +648,21 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
   // Fonction pour gérer les réservations en cash
   const handleCashPayment = async () => {
-    if (!selectedDates) return;
+    console.log('🔍 [DEBUG] handleCashPayment appelé');
+    console.log('🔍 [DEBUG] selectedDates:', selectedDates);
+    console.log('🔍 [DEBUG] formData:', formData);
+    
+    if (!selectedDates) {
+      console.log('❌ [DEBUG] Aucune date sélectionnée dans handleCashPayment');
+      setReservationError('Veuillez sélectionner des dates de réservation');
+      return;
+    }
+    
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.activity) {
+      console.log('❌ [DEBUG] Champs obligatoires manquants dans handleCashPayment');
+      setReservationError('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
 
     setReservationError(null);
     const cashTransactionId = `CASH_${Date.now()}`;
@@ -735,9 +749,32 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
   const handleReservation = async () => {
     console.log('🔍 [DEBUG] handleReservation appelé');
     console.log('🔍 [DEBUG] selectedPaymentMethod:', selectedPaymentMethod);
+    console.log('🔍 [DEBUG] selectedDates:', selectedDates);
+    console.log('🔍 [DEBUG] formData:', formData);
+    console.log('🔍 [DEBUG] spaceInfo:', spaceInfo);
+    console.log('🔍 [DEBUG] spaceAvailability:', spaceAvailability);
     
     if (!selectedPaymentMethod) {
       console.log('❌ [DEBUG] Aucune méthode de paiement sélectionnée');
+      setReservationError('Veuillez sélectionner une méthode de paiement');
+      return;
+    }
+    
+    if (!selectedDates) {
+      console.log('❌ [DEBUG] Aucune date sélectionnée');
+      setReservationError('Veuillez sélectionner des dates de réservation');
+      return;
+    }
+    
+    if (!spaceInfo) {
+      console.log('❌ [DEBUG] Informations d\'espace manquantes');
+      setReservationError('Informations d\'espace manquantes');
+      return;
+    }
+    
+    if (!spaceAvailability.isAvailable) {
+      console.log('❌ [DEBUG] Espace non disponible');
+      setReservationError('Cet espace n\'est pas disponible pour les dates sélectionnées');
       return;
     }
     
@@ -1350,6 +1387,20 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
             customerPhone={formData.phone}
           />
 
+          {/* Affichage des erreurs */}
+          {reservationError && (
+            <div className="mb-8 p-6 rounded-2xl border-2 border-red-200 bg-red-50 backdrop-blur-sm">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <p className="text-red-700 text-center font-medium">
+                  {reservationError}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Messages informatifs selon la méthode sélectionnée */}
           {selectedPaymentMethod && (
             <div className="mb-8 p-6 rounded-2xl border-2 backdrop-blur-sm">
@@ -1365,8 +1416,6 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                   </p>
                 </div>
               )}
-              
-
               
               {selectedPaymentMethod === 'CASH' && (
                 <div className="text-center">

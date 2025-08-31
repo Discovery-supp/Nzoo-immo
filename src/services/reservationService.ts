@@ -22,7 +22,27 @@ export const createReservation = async (data: ReservationData): Promise<Reservat
       throw new Error('Les dates de début et de fin sont obligatoires');
     }
 
-    // Préparer les données pour la base de données
+    // Étape 1: Créer ou récupérer le compte client
+    console.log('👤 [RESERVATION] Création/récupération du compte client...');
+    const { data: clientResult, error: clientError } = await supabase
+      .rpc('get_or_create_client', {
+        client_email: data.email,
+        client_full_name: data.fullName,
+        client_phone: data.phone,
+        client_company: data.company || null,
+        client_activity: data.activity,
+        client_address: data.address || null
+      });
+
+    if (clientError) {
+      console.error('❌ [RESERVATION] Erreur création compte client:', clientError);
+      throw new Error(`Erreur lors de la création du compte client: ${clientError.message}`);
+    }
+
+    const clientId = clientResult;
+    console.log('✅ [RESERVATION] Compte client géré:', clientId);
+
+    // Étape 2: Préparer les données pour la base de données
     const reservationData = {
       full_name: data.fullName,
       email: data.email,
@@ -39,12 +59,13 @@ export const createReservation = async (data: ReservationData): Promise<Reservat
       payment_method: data.paymentMethod || 'cash',
       transaction_id: data.transactionId || `RES_${Date.now()}`,
       status: 'pending',
+      client_id: clientId, // Lier la réservation au compte client
       created_at: new Date().toISOString()
     };
 
-    console.log('📝 [RESERVATION] Données préparées:', reservationData);
+    console.log('📝 [RESERVATION] Données préparées avec client_id:', reservationData);
 
-    // Insérer la réservation dans la base de données
+    // Étape 3: Insérer la réservation dans la base de données
     const { data: reservation, error: insertError } = await supabase
       .from('reservations')
       .insert(reservationData)
@@ -56,9 +77,18 @@ export const createReservation = async (data: ReservationData): Promise<Reservat
       throw new Error(`Erreur lors de la création de la réservation: ${insertError.message}`);
     }
 
-    console.log('✅ [RESERVATION] Réservation créée:', reservation);
+    console.log('✅ [RESERVATION] Réservation créée avec succès:', reservation);
 
-    // Envoyer les emails de confirmation
+    // Étape 4: Mettre à jour les statistiques du client
+    try {
+      await supabase.rpc('update_client_stats', { client_uuid: clientId });
+      console.log('✅ [RESERVATION] Statistiques client mises à jour');
+    } catch (statsError) {
+      console.warn('⚠️ [RESERVATION] Erreur mise à jour statistiques:', statsError);
+      // Ne pas faire échouer la réservation si les stats échouent
+    }
+
+    // Étape 5: Envoyer les emails de confirmation
     try {
       const emailResult = await sendReservationEmails(reservation);
       console.log('✅ [RESERVATION] Emails traités:', emailResult);

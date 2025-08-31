@@ -108,32 +108,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     userProfile ? { email: userProfile.email, role: userProfile.role } : undefined
   );
   
-  // Logs de débogage simples
-  console.log('🔍 Dashboard - État:', {
-    userProfile: userProfile ? { email: userProfile.email, role: userProfile.role } : null,
-    reservationsCount: reservations?.length || 0,
-    loading,
-    error
-  });
-  
-  // Logs supplémentaires pour diagnostiquer le problème client
-  if (userProfile?.role === 'clients') {
-    console.log('🔍 Dashboard - Client détecté:', {
-      email: userProfile.email,
-      role: userProfile.role,
-      hasReservations: reservations && reservations.length > 0,
-      reservationsCount: reservations?.length || 0,
-      reservations: reservations?.map(r => ({ id: r.id, email: r.email, full_name: r.full_name }))
-    });
-    
-    // Vérifier que toutes les réservations appartiennent bien au client
-    const otherReservations = reservations?.filter(r => r.email !== userProfile.email);
-    if (otherReservations && otherReservations.length > 0) {
-      console.error('🚨 ERREUR: Le client voit des réservations d\'autres utilisateurs:', otherReservations);
-    } else {
-      console.log('✅ Filtrage correct: Le client ne voit que ses propres réservations');
-    }
-  }
+
   
   // Utiliser le hook de permissions
   const { hasPermission } = usePermissions();
@@ -142,9 +117,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   React.useEffect(() => {
     const restrictedTabs = ['clients', 'users', 'audit'];
     if (activeTab && restrictedTabs.includes(activeTab) && userProfile?.role !== 'admin') {
-      console.log('🚫 Accès restreint détecté, redirection vers overview');
+
       setActiveTab('overview');
       showNotification('error', 'Accès restreint : Seuls les administrateurs peuvent accéder à cette section');
+    }
+    
+    // Pour les clients, s'assurer qu'ils sont sur un onglet autorisé
+    if (userProfile?.role === 'clients' && !['reservations', 'profile'].includes(activeTab)) {
+
+      setActiveTab('reservations');
     }
   }, [activeTab, userProfile?.role]);
 
@@ -156,10 +137,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Fonction pour supprimer un client
   const handleDeleteClient = async (clientEmail: string) => {
-    console.log('👋 Tentative de suppression du client:', clientEmail);
+
     
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.')) {
-      console.log('✅ Confirmation reçue, suppression du client:', clientEmail);
+      
       
       try {
         // Supprimer le client de la base de données
@@ -175,13 +156,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           return;
         }
 
-        console.log('✅ Client supprimé avec succès de la base de données');
+
         
         // Supprimer le client de la liste affichée immédiatement
         setDisplayedClients(prev => {
           const newList = prev.filter(client => client.email !== clientEmail);
-          console.log('🎉 Client supprimé de la liste affichée:', clientEmail);
-          console.log('🎉 Nouveau nombre de clients:', newList.length);
+          
           return newList;
         });
 
@@ -209,14 +189,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   useEffect(() => {
     // Pour les clients, forcer l'onglet réservations SAUF pour l'onglet profile
     if (userProfile?.role === 'clients' && activeTab !== 'reservations' && activeTab !== 'profile') {
-      console.log('👋 Client détecté - Redirection vers l\'onglet réservations');
+  
       setActiveTab('reservations');
       return;
     }
     
     // Protection pour l'onglet audit - seuls les administrateurs peuvent y accéder
     if (activeTab === 'audit' && userProfile?.role !== 'admin') {
-      console.log('🚫 Tentative d\'accès non autorisé à l\'onglet audit - Redirection vers overview');
+
       showNotification('error', 'Accès restreint : Seuls les administrateurs peuvent accéder au journal d\'audit');
       setActiveTab('overview');
       return;
@@ -256,7 +236,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Fonction pour rafraîchir les données
   const handleRefresh = async () => {
-    console.log('🔄 Refreshing dashboard data...');
+
     await refetch();
     setLastRefresh(new Date());
   };
@@ -279,29 +259,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Fonction pour charger les clients
   const loadClients = async () => {
-    console.log('🔄 Chargement des clients...');
+
     setClientsLoading(true);
     
     try {
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('role', 'clients')
-        .order('created_at', { ascending: false });
+      // Utiliser le nouveau service de gestion des comptes clients
+      const { ClientAccountService } = await import('../services/clientAccountService');
+      const clientsData = await ClientAccountService.getAllClientsWithStats();
 
-      if (error) {
-        console.error('🚨 Erreur lors du chargement des clients:', error);
-        showNotification('error', 'Erreur lors du chargement des clients');
-        // Garder les données existantes en cas d'erreur
-        return;
-      }
-
-      console.log('✅ Clients chargés avec succès:', data?.length || 0);
+      
       
       // Mettre à jour les états de manière sûre
-      if (data) {
-        setClients(data);
-        setDisplayedClients(data);
+      if (clientsData) {
+        setClients(clientsData);
+        setDisplayedClients(clientsData);
       } else {
         setClients([]);
         setDisplayedClients([]);
@@ -464,8 +435,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Fonctions de calcul des statistiques
   const calculateStats = () => {
-    console.log('🔍 Calculating stats with reservations:', reservations.length);
-    console.log('🔍 Reservations data:', reservations);
+
     
     // Toujours retourner des statistiques, même si vides
     const defaultStats = {
@@ -485,7 +455,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     };
     
     if (!reservations.length) {
-      console.log('🔍 No reservations found, returning default stats');
+  
       return defaultStats;
     }
 
@@ -493,22 +463,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    console.log('🔍 Date filters:', {
-      today: today.toDateString(),
-      startOfWeek: startOfWeek.toDateString(),
-      startOfMonth: startOfMonth.toDateString()
-    });
+
 
     const stats = reservations.reduce((acc, reservation) => {
       const reservationDate = new Date(reservation.created_at);
       const amount = Number(reservation.amount) || 0;
       
-      console.log('🔍 Processing reservation:', {
-        id: reservation.id,
-        amount,
-        space_type: reservation.space_type,
-        date: reservationDate.toDateString()
-      });
+
 
       // Total
       acc.totalReservations += 1;
@@ -527,7 +488,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
       // Par type d'espace
       const spaceType = reservation.space_type;
-      console.log('🔍 Processing space type:', spaceType, 'with amount:', amount);
       
       if (spaceType === 'coworking') {
         acc.revenueByType.coworking += amount;
@@ -561,7 +521,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
     stats.averageAmount = stats.totalReservations > 0 ? stats.totalRevenue / stats.totalReservations : 0;
 
-    console.log('🔍 Calculated stats:', stats);
+
     return stats;
   };
 
@@ -595,7 +555,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       }
     });
 
-    console.log('🔍 Reservations over time data:', last30Days.slice(-7)); // Log derniers 7 jours
+
     return last30Days.map(day => ({
       ...day,
       displayDate: new Date(day.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
@@ -606,7 +566,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Calcul des clients uniques
   const getClientsStats = () => {
-    console.log('🔥 Calculating client stats...');
+
     const uniqueClients = new Map();
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -639,11 +599,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     const clientsArray = Array.from(uniqueClients.values());
     const newThisMonth = clientsArray.filter(client => client.isNewThisMonth).length;
 
-    console.log('🔥 Client stats calculated:', {
-      total: clientsArray.length,
-      newThisMonth,
-      topClientsCount: clientsArray.slice(0, 10).length
-    });
+
 
     return {
       totalClients: clientsArray.length,
@@ -663,11 +619,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     // Pour les clients, s'assurer qu'ils ne voient que leurs propres réservations
     if (userProfile?.role === 'clients') {
       filtered = filtered.filter(r => r.email === userProfile.email);
-      console.log('🔒 Filtrage client appliqué:', {
-        userEmail: userProfile.email,
-        filteredCount: filtered.length,
-        allReservationsCount: reservations.length
-      });
+
     }
 
     // Filtre par statut
@@ -836,7 +788,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     setDownloadingInvoice(reservation.id);
     try {
       await generateAndDownloadInvoice(reservation);
-      console.log('✅ Facture téléchargée avec succès');
+      
       // Afficher une notification de succès
       setNotification({
         type: 'success',
@@ -1103,35 +1055,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
         </div>
       </div>
 
-      {/* Debug Information */}
-      <div className="bg-yellow-50 rounded-2xl p-6 border border-yellow-200">
-        <h4 className="font-semibold text-yellow-800 mb-4 font-montserrat">🔍 Diagnostic des Données de Revenus</h4>
-        <div className="text-sm text-yellow-700 space-y-2 font-poppins">
-          <p><strong>État du chargement:</strong> {loading ? 'Chargement...' : 'Terminé'}</p>
-          <p><strong>Erreur:</strong> {error || 'Aucune erreur'}</p>
-          <p><strong>Total réservations chargées:</strong> {reservations.length}</p>
-          <p><strong>Revenus total calculé:</strong> ${stats.totalRevenue.toFixed(2)}</p>
-          <p><strong>Types d'espaces trouvés:</strong> {[...new Set(reservations.map(r => r.space_type))].join(', ') || 'Aucun'}</p>
-          <p><strong>Dernière actualisation:</strong> {lastRefresh.toLocaleString('fr-FR')}</p>
-          <p><strong>Utilisateur actuel:</strong> {userProfile?.email} ({userProfile?.role})</p>
-          {reservations.length > 0 && (
-            <div className="mt-4 p-3 bg-yellow-100 rounded-lg">
-              <p className="font-semibold mb-2">Exemples de réservations:</p>
-              {reservations.slice(0, 3).map((r, i) => (
-                <p key={i} className="text-xs">
-                  ID: {r.id} | Type: {r.space_type} | Montant: ${r.amount} | Statut: {r.status}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
-        <button 
-          onClick={handleRefresh}
-          className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-        >
-          🔄 Actualiser les données
-        </button>
-      </div>
+
     </div>
   );
 
@@ -1527,29 +1451,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {(reservations || []).filter(r => r.email === client.email).length}
+                      {client.total_reservations || 0}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      ${(reservations || [])
-                        .filter(r => r.email === client.email)
-                        .reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
-                        .toFixed(2)}
+                      ${(client.total_spent || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {(() => {
-                        const clientReservations = (reservations || []).filter(r => r.email === client.email);
-                        if (clientReservations.length > 0) {
-                          const lastReservation = clientReservations.sort((a, b) => 
-                            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                          )[0];
-                          return new Date(lastReservation.created_at).toLocaleDateString('fr-FR');
-                        }
-                        return 'Aucune';
-                      })()}
+                      {client.last_reservation_date 
+                        ? new Date(client.last_reservation_date).toLocaleDateString('fr-FR')
+                        : 'Aucune'
+                      }
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1618,7 +1533,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           setIsLoadingProfile(false);
           return;
         }
-        console.log('✅ Avatar uploadé avec succès');
+
       }
 
       // Préparer les données de mise à jour
@@ -2072,33 +1987,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   );
 
   const tabs = [
-    // Onglets de base pour tous les utilisateurs (admin et user)
-    { id: 'overview', label: t.tabs.overview, icon: BarChart3 },
-    { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
-    { id: 'reservationManagement', label: t.tabs.reservationManagement, icon: Calendar },
-    { id: 'spaces', label: 'Espaces', icon: Building },
-    { id: 'revenue', label: t.tabs.revenue, icon: DollarSign },
-    { id: 'statistics', label: t.tabs.statistics, icon: TrendingUp },
-    { id: 'aiFollowUps', label: 'Relances IA', icon: Brain },
-    // Onglets réservés aux administrateurs uniquement
-    ...(userProfile?.role === 'admin' ? [
-      { id: 'clients', label: t.tabs.clients, icon: Users },
-      { id: 'users', label: t.tabs.users, icon: Users },
-      { id: 'audit', label: 'Audit', icon: BarChart3 }
-    ] : []),
-    { id: 'profile', label: 'Mon Profil', icon: User }
+    // Pour les clients : seulement Réservations et Mon Profil
+    ...(userProfile?.role === 'clients' ? [
+      { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
+      { id: 'profile', label: 'Mon Profil', icon: User }
+    ] : [
+      // Pour les administrateurs et autres rôles : tous les onglets
+      { id: 'overview', label: t.tabs.overview, icon: BarChart3 },
+      { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
+      { id: 'reservationManagement', label: t.tabs.reservationManagement, icon: Calendar },
+      { id: 'spaces', label: 'Espaces', icon: Building },
+      { id: 'revenue', label: t.tabs.revenue, icon: DollarSign },
+      { id: 'statistics', label: t.tabs.statistics, icon: TrendingUp },
+      { id: 'aiFollowUps', label: 'Relances IA', icon: Brain },
+      // Onglets réservés aux administrateurs uniquement
+      ...(userProfile?.role === 'admin' ? [
+        { id: 'clients', label: t.tabs.clients, icon: Users },
+        { id: 'users', label: t.tabs.users, icon: Users },
+        { id: 'audit', label: 'Audit', icon: BarChart3 }
+      ] : []),
+      { id: 'profile', label: 'Mon Profil', icon: User }
+    ])
   ];
   
-  // Logs pour diagnostiquer les onglets
-  console.log('🔍 Dashboard - Onglets disponibles:', {
-    userRole: userProfile?.role,
-    isAdmin: isAdmin(),
-    tabsCount: tabs.length,
-    tabs: tabs.map(tab => ({ id: tab.id, label: tab.label })),
-    activeTab: activeTab,
-    userProfile: userProfile ? { id: userProfile.id, email: userProfile.email, role: userProfile.role } : null,
-    hasProfileTab: tabs.some(tab => tab.id === 'profile')
-  });
+
 
 
 
@@ -2272,7 +2184,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
               </div>
             )
           )}
-          {activeTab === 'clients' && userProfile?.role === 'admin' && (console.log('AUDIT_PAGE_VIEW','clients'), renderClients())}
+          {activeTab === 'clients' && userProfile?.role === 'admin' && renderClients()}
           {activeTab === 'aiFollowUps' && <AIFollowUpManager language={language} />}
           {activeTab === 'profile' && (
             <div className="flex items-center justify-center min-h-[400px]">

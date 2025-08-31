@@ -313,7 +313,7 @@ export const sendClientConfirmationEmail = async (reservation: any) => {
             Bonjour <strong>${reservation.full_name}</strong>,
         </div>
         
-        <div class="main-message">
+        <div class="greeting">
             Nous sommes ravis de vous confirmer que votre réservation a été acceptée et confirmée. 
             Vous trouverez ci-dessous tous les détails de votre réservation.
         </div>
@@ -370,6 +370,108 @@ export const sendClientConfirmationEmail = async (reservation: any) => {
     console.log('📧 [DIRECT] Mode simulation - Email non envoyé mais réservation créée');
     console.log('📧 [DIRECT] Email qui aurait été envoyé à:', reservation.email);
     console.log('📧 [DIRECT] Sujet: Réservation confirmée -', reservation.transaction_id);
+    
+    return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
+  }
+};
+
+// Fonction pour envoyer l'email d'attente de paiement (réservations en cash)
+export const sendClientPaymentPendingEmail = async (reservation: any) => {
+  console.log('📧 [DIRECT] Envoi email attente paiement client:', reservation.email);
+
+  try {
+    const emailContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="warning-icon">⏳</div>
+            <h1 style="color: #f59e0b; font-size: 24px; margin-bottom: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700;">Réservation en Attente de Paiement</h1>
+            <p style="color: #183154; font-size: 16px; font-family: 'Poppins', sans-serif;">Votre réservation a été reçue et est en attente de confirmation</p>
+        </div>
+        
+        <div class="greeting">
+            Bonjour <strong>${reservation.full_name}</strong>,
+        </div>
+        
+        <div class="main-message">
+            Nous avons bien reçu votre réservation et nous vous en remercions. 
+            Cependant, votre réservation est actuellement <strong>en attente de paiement</strong> et nécessite une confirmation.
+        </div>
+        
+        <div class="reservation-details">
+            <div class="detail-title">📋 Détails de votre réservation</div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Référence :</span>
+                <span class="detail-value">${reservation.transaction_id}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Espace :</span>
+                <span class="detail-value">${reservation.space_type}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Dates :</span>
+                <span class="detail-value">${reservation.start_date} à ${reservation.end_date}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Montant :</span>
+                <span class="detail-value amount">$${reservation.amount}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Méthode de paiement :</span>
+                <span class="detail-value">${reservation.payment_method}</span>
+            </div>
+        </div>
+        
+        <div style="background-color: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin: 30px 0;">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 24px; margin-bottom: 10px;">⚠️ ATTENTION IMPORTANT</div>
+            </div>
+            <div style="color: #92400e; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 600; text-align: center; margin-bottom: 15px;">
+                Votre réservation sera automatiquement annulée dans 5 jours si le paiement n'est pas régularisé !
+            </div>
+            <div style="color: #92400e; font-size: 14px; font-family: 'Poppins', sans-serif; text-align: center;">
+                Pour confirmer votre réservation, veuillez vous présenter au bureau pour effectuer le paiement en espèces.
+            </div>
+        </div>
+        
+        <div style="background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; margin: 30px 0;">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="color: #1e40af; font-size: 18px; font-family: 'Montserrat', sans-serif; font-weight: 600;">
+                    📍 Adresse du Bureau
+                </div>
+            </div>
+            <div style="color: #1e40af; font-size: 16px; font-family: 'Poppins', sans-serif; text-align: center; line-height: 1.6;">
+                16, colonel Lukusa, Commune de la Gombe<br>
+                Kinshasa, République Démocratique du Congo
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="color: #183154; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                Merci de votre compréhension. Notre équipe est à votre disposition pour toute question.
+            </p>
+        </div>
+    `;
+
+    const emailHtml = createEmailTemplate(emailContent);
+
+    return await sendEmailDirect(
+      reservation.email,
+      `⏳ Réservation en attente de paiement - ${reservation.transaction_id}`,
+      emailHtml,
+      reservation
+    );
+    
+  } catch (error) {
+    console.error('❌ [DIRECT] Erreur email attente paiement client:', error);
+    
+    // Fallback: simulation d'envoi d'email
+    console.log('📧 [DIRECT] Mode simulation - Email attente paiement non envoyé');
+    console.log('📧 [DIRECT] Email qui aurait été envoyé à:', reservation.email);
+    console.log('📧 [DIRECT] Sujet: Réservation en attente de paiement -', reservation.transaction_id);
     
     return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
   }
@@ -458,15 +560,26 @@ export const sendReservationEmails = async (reservation: any) => {
   console.log('📧 [DIRECT] Début envoi emails pour réservation:', reservation.id);
 
   try {
-    // Email de confirmation client uniquement
-    const clientResult = await sendClientConfirmationEmail(reservation);
+    let clientResult;
+    
+    // Vérifier le type de paiement pour envoyer le bon email
+    if (reservation.payment_method === 'cash') {
+      // Pour les paiements en cash : email d'attente de paiement
+      console.log('💵 [DIRECT] Paiement en cash détecté - Envoi email attente paiement');
+      clientResult = await sendClientPaymentPendingEmail(reservation);
+    } else {
+      // Pour les autres méthodes de paiement : email de confirmation
+      console.log('✅ [DIRECT] Paiement non-cash détecté - Envoi email confirmation');
+      clientResult = await sendClientConfirmationEmail(reservation);
+    }
     
     console.log('✅ [DIRECT] Email client traité');
     
     return {
       success: clientResult.success,
       clientEmail: clientResult,
-      adminEmails: { success: false, message: 'Emails admin désactivés' }
+      adminEmails: { success: false, message: 'Emails admin désactivés' },
+      emailType: reservation.payment_method === 'cash' ? 'payment_pending' : 'confirmed'
     };
     
   } catch (error) {

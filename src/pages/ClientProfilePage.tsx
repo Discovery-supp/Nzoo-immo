@@ -15,6 +15,8 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ language }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [clientReservations, setClientReservations] = useState<any[]>([]);
+  const [reservationsLoading, setReservationsLoading] = useState(false);
 
   // État pour les informations modifiables
   const [formData, setFormData] = useState({
@@ -33,6 +35,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ language }) => {
   useEffect(() => {
     if (user) {
       loadUserProfile();
+      loadClientReservations();
       setFormData({
         full_name: user.full_name || '',
         email: user.email || '',
@@ -58,6 +61,27 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ language }) => {
       }
     } catch (error) {
       console.error('Erreur lors du chargement du profil:', error);
+    }
+  };
+
+  // Fonction pour charger les réservations du client
+  const loadClientReservations = async () => {
+    if (!user) return;
+    
+    setReservationsLoading(true);
+    try {
+      const { ClientAccountService } = await import('../services/clientAccountService');
+      
+      // Récupérer les réservations par email (même si client_id n'est pas défini)
+      const reservations = await ClientAccountService.getClientReservationsByEmail(user.email);
+      setClientReservations(reservations);
+      
+      console.log('✅ Réservations client chargées:', reservations.length);
+    } catch (error) {
+      console.error('Erreur lors du chargement des réservations:', error);
+      setClientReservations([]);
+    } finally {
+      setReservationsLoading(false);
     }
   };
 
@@ -544,6 +568,68 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ language }) => {
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Client Reservations Section */}
+                <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+                  <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {translations.myReservations || 'Mes Réservations'}
+                  </h5>
+                  
+                  {reservationsLoading ? (
+                    <div className="text-center py-4">
+                      <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                      <p className="text-gray-500 mt-2">{translations.loading || 'Chargement...'}</p>
+                    </div>
+                  ) : clientReservations.length > 0 ? (
+                    <div className="space-y-3">
+                      {clientReservations.map((reservation, index) => (
+                        <div key={reservation.id || index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {reservation.space_type === 'coworking' ? 'Espace Coworking' :
+                                   reservation.space_type === 'bureau-prive' ? 'Bureau Privé' :
+                                   reservation.space_type === 'domiciliation' ? 'Service Domiciliation' :
+                                   reservation.space_type}
+                                </span>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  reservation.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                  reservation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  reservation.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {reservation.status === 'confirmed' ? 'Confirmé' :
+                                   reservation.status === 'pending' ? 'En attente' :
+                                   reservation.status === 'cancelled' ? 'Annulé' :
+                                   reservation.status}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                <p>Du {new Date(reservation.start_date).toLocaleDateString('fr-FR')} au {new Date(reservation.end_date).toLocaleDateString('fr-FR')}</p>
+                                <p>Montant: ${reservation.amount}</p>
+                                {reservation.email !== user?.email && (
+                                  <p className="text-xs text-blue-600 mt-1">
+                                    Réservation avec l'email: {reservation.email}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(reservation.created_at).toLocaleDateString('fr-FR')}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p>{translations.noReservations || 'Aucune réservation trouvée'}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Change Password Section */}
