@@ -1,6 +1,7 @@
 import React from 'react';
 import { APP_CONFIG } from '../config/app.config';
 import { AIAssistantService, ChatMessage } from '../services/aiAssistantService';
+import { PhoneCall, X } from 'lucide-react';
 
 export const AIChatbot: React.FC = () => {
   if (!APP_CONFIG.aiAssistant.enabled) return null;
@@ -39,7 +40,17 @@ export const AIChatbot: React.FC = () => {
           borderRadius: '9999px', padding: '12px 16px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)', zIndex: 50,
         }}
       >
-        {isOpen ? 'Fermer' : 'Assistant'}
+        {isOpen ? (
+          <>
+            <X size={18} />
+            Fermer
+          </>
+        ) : (
+          <>
+            <PhoneCall size={18} />
+            Assistant
+          </>
+        )}
       </button>
 
       {isOpen && (

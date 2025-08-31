@@ -4,7 +4,7 @@ import { useReservations } from '../hooks/useReservations';
 import { useAuth } from '../hooks/useAuth';
 import { ReservationEditForm } from './ReservationEditForm';
 import { type Reservation } from '../types';
-import { sendConfirmationEmail } from '../services/emailService';
+import { sendReservationConfirmationEmail, sendReservationCancellationEmail, sendReservationCompletionEmail } from '../services/emailServiceUnified';
 import { generateAndDownloadInvoice } from '../services/invoiceService';
 import { safeString } from '../utils/validation';
 import { checkAndApplyReservationRules, getRulesSummary } from '../utils/reservationRules';
@@ -24,7 +24,7 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
     authLoading 
   });
 
-  const { reservations, loading, error, updateReservationStatus, updateReservation, deleteReservation } = useReservations(
+  const { reservations, loading, error, updateReservationStatus, deleteReservation } = useReservations(
     user ? { email: user.email, role: user.role } : undefined
   );
 
@@ -312,9 +312,9 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
     
     try {
       // Si l'utilisateur n'est pas admin, on ne sauvegarde que le statut
-      const dataToSave = user?.role === 'admin' ? editFormData : { status: editFormData.status };
-      
-      await updateReservation(editingReservation, dataToSave);
+      if (editFormData.status) {
+        await updateReservationStatus(editingReservation, editFormData.status);
+      }
       showNotification('success', t.saveSuccess);
       setEditingReservation(null);
       setEditFormData({});
@@ -341,34 +341,31 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
           try {
             console.log('📧 Envoi automatique d\'email de confirmation pour la réservation:', reservationId);
             
-            const emailResult = await sendConfirmationEmail({
-              to: reservation.email,
-              subject: `Confirmation de votre réservation - ${reservation.full_name}`,
-              reservationData: {
-                fullName: reservation.full_name,
-                email: reservation.email,
-                phone: reservation.phone,
-                company: reservation.company || undefined,
-                activity: reservation.activity || '',
-                spaceType: reservation.space_type,
-                startDate: reservation.start_date,
-                endDate: reservation.end_date,
-                amount: reservation.amount,
-                transactionId: reservation.id,
-                status: newStatus
-              }
+            const emailResult = await sendReservationConfirmationEmail({
+              id: reservation.id,
+              full_name: reservation.full_name,
+              email: reservation.email,
+              phone: reservation.phone,
+              company: reservation.company || '',
+              activity: reservation.activity || '',
+              space_type: reservation.space_type,
+              start_date: reservation.start_date,
+              end_date: reservation.end_date,
+              amount: reservation.amount,
+              payment_method: reservation.payment_method,
+              status: newStatus
             });
 
-            if (emailResult.emailSent) {
+            if (emailResult.success) {
               console.log('✅ Email de confirmation envoyé avec succès');
-              showNotification('success', t.autoEmailSuccess);
+              showNotification('success', 'Email de confirmation envoyé automatiquement au client');
             } else {
               console.error('❌ Erreur lors de l\'envoi automatique de l\'email:', emailResult.error);
-              showNotification('warning', t.autoEmailWarning);
+              showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email de confirmation');
             }
           } catch (emailError) {
             console.error('❌ Erreur lors de l\'envoi automatique de l\'email:', emailError);
-            showNotification('warning', t.autoEmailWarning);
+            showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email de confirmation');
           }
         }
       }
@@ -380,25 +377,22 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
           try {
             console.log('📧 Envoi automatique d\'email d\'annulation pour la réservation:', reservationId);
             
-            const emailResult = await sendConfirmationEmail({
-              to: reservation.email,
-              subject: `Annulation de votre réservation - ${reservation.full_name}`,
-              reservationData: {
-                fullName: reservation.full_name,
-                email: reservation.email,
-                phone: reservation.phone,
-                company: reservation.company || undefined,
-                activity: reservation.activity || '',
-                spaceType: reservation.space_type,
-                startDate: reservation.start_date,
-                endDate: reservation.end_date,
-                amount: reservation.amount,
-                transactionId: reservation.id,
-                status: newStatus
-              }
+            const emailResult = await sendReservationCancellationEmail({
+              id: reservation.id,
+              full_name: reservation.full_name,
+              email: reservation.email,
+              phone: reservation.phone,
+              company: reservation.company || '',
+              activity: reservation.activity || '',
+              space_type: reservation.space_type,
+              start_date: reservation.start_date,
+              end_date: reservation.end_date,
+              amount: reservation.amount,
+              payment_method: reservation.payment_method,
+              status: newStatus
             });
 
-            if (emailResult.emailSent) {
+            if (emailResult.success) {
               console.log('✅ Email d\'annulation envoyé avec succès');
               showNotification('success', 'Email d\'annulation envoyé automatiquement au client');
             } else {
@@ -408,6 +402,42 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
           } catch (emailError) {
             console.error('❌ Erreur lors de l\'envoi automatique de l\'email d\'annulation:', emailError);
             showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email d\'annulation');
+          }
+        }
+      }
+
+      // Envoyer un email de completion si le statut passe à "completed"
+      if (newStatus === 'completed') {
+        const reservation = reservations.find(r => r.id === reservationId);
+        if (reservation) {
+          try {
+            console.log('📧 Envoi automatique d\'email de completion pour la réservation:', reservationId);
+            
+            const emailResult = await sendReservationCompletionEmail({
+              id: reservation.id,
+              full_name: reservation.full_name,
+              email: reservation.email,
+              phone: reservation.phone,
+              company: reservation.company || '',
+              activity: reservation.activity || '',
+              space_type: reservation.space_type,
+              start_date: reservation.start_date,
+              end_date: reservation.end_date,
+              amount: reservation.amount,
+              payment_method: reservation.payment_method,
+              status: newStatus
+            });
+
+            if (emailResult.success) {
+              console.log('✅ Email de completion envoyé avec succès');
+              showNotification('success', 'Email de completion envoyé automatiquement au client');
+            } else {
+              console.error('❌ Erreur lors de l\'envoi automatique de l\'email de completion:', emailResult.error);
+              showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email de completion');
+            }
+          } catch (emailError) {
+            console.error('❌ Erreur lors de l\'envoi automatique de l\'email de completion:', emailError);
+            showNotification('error', 'Statut mis à jour mais erreur lors de l\'envoi de l\'email de completion');
           }
         }
       }
@@ -449,33 +479,30 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
     try {
       console.log('📧 Envoi d\'email personnalisé pour la réservation:', reservation.id);
       
-      const emailResult = await sendConfirmationEmail({
-        to: reservation.email,
-        subject: emailSubject,
-        reservationData: {
-          fullName: reservation.full_name,
-          email: reservation.email,
-          phone: reservation.phone,
-          company: reservation.company || undefined,
-          activity: reservation.activity || '',
-          spaceType: reservation.space_type,
-          startDate: reservation.start_date,
-          endDate: reservation.end_date,
-          amount: reservation.amount,
-          transactionId: reservation.id,
-          status: reservation.status
-        }
+      const emailResult = await sendReservationConfirmationEmail({
+        id: reservation.id,
+        full_name: reservation.full_name,
+        email: reservation.email,
+        phone: reservation.phone,
+        company: reservation.company || '',
+        activity: reservation.activity || '',
+        space_type: reservation.space_type,
+        start_date: reservation.start_date,
+        end_date: reservation.end_date,
+        amount: reservation.amount,
+        payment_method: reservation.payment_method,
+        status: reservation.status
       });
 
-      if (emailResult.emailSent) {
+      if (emailResult.success) {
         console.log('✅ Email personnalisé envoyé avec succès');
-        showNotification('success', t.manualEmailSuccess);
+        showNotification('success', 'Email personnalisé envoyé avec succès');
         setShowEmailModal(null);
         setEmailSubject('');
         setEmailMessage('');
       } else {
         console.error('❌ Erreur lors de l\'envoi de l\'email personnalisé:', emailResult.error);
-        showNotification('error', t.manualEmailError + ': ' + (emailResult.error || 'Erreur inconnue'));
+        showNotification('error', 'Erreur lors de l\'envoi de l\'email personnalisé: ' + (emailResult.error || 'Erreur inconnue'));
       }
     } catch (error) {
       console.error('Erreur lors de l\'envoi de l\'email personnalisé:', error);
@@ -496,34 +523,31 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
   const handleSendEmail = async (reservation: Reservation) => {
     setSendingEmail(reservation.id);
     try {
-      const emailResult = await sendConfirmationEmail({
-        to: reservation.email,
-        subject: `Mise Ã  jour de votre réservation - ${reservation.full_name}`,
-        reservationData: {
-          fullName: reservation.full_name,
-          email: reservation.email,
-          phone: reservation.phone,
-          company: reservation.company || undefined,
-          activity: reservation.activity || '',
-          spaceType: reservation.space_type,
-          startDate: reservation.start_date,
-          endDate: reservation.end_date,
-          amount: reservation.amount,
-          transactionId: reservation.id,
-          status: reservation.status
-        }
+      const emailResult = await sendReservationConfirmationEmail({
+        id: reservation.id,
+        full_name: reservation.full_name,
+        email: reservation.email,
+        phone: reservation.phone,
+        company: reservation.company || '',
+        activity: reservation.activity || '',
+        space_type: reservation.space_type,
+        start_date: reservation.start_date,
+        end_date: reservation.end_date,
+        amount: reservation.amount,
+        payment_method: reservation.payment_method,
+        status: reservation.status
       });
 
-      if (emailResult.emailSent) {
+      if (emailResult.success) {
         console.log('✅ Email manuel envoyé avec succès');
-        showNotification('success', t.manualEmailSuccess);
+        showNotification('success', 'Email manuel envoyé avec succès');
       } else {
         console.error('❌ Erreur lors de l\'envoi manuel de l\'email:', emailResult.error);
-        showNotification('error', t.manualEmailError + ': ' + (emailResult.error || 'Erreur inconnue'));
+        showNotification('error', 'Erreur lors de l\'envoi manuel de l\'email: ' + (emailResult.error || 'Erreur inconnue'));
       }
     } catch (error) {
       console.error('Erreur lors de l\'envoi manuel de l\'email:', error);
-      showNotification('error', t.manualEmailError + ': ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
+      showNotification('error', 'Erreur lors de l\'envoi manuel de l\'email: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
     } finally {
       setSendingEmail(null);
     }

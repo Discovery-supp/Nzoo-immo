@@ -138,6 +138,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   // Utiliser le hook de permissions
   const { hasPermission } = usePermissions();
 
+  // Vérifier et rediriger si l'utilisateur essaie d'accéder à des onglets restreints
+  React.useEffect(() => {
+    const restrictedTabs = ['clients', 'users', 'audit'];
+    if (activeTab && restrictedTabs.includes(activeTab) && userProfile?.role !== 'admin') {
+      console.log('🚫 Accès restreint détecté, redirection vers overview');
+      setActiveTab('overview');
+      showNotification('error', 'Accès restreint : Seuls les administrateurs peuvent accéder à cette section');
+    }
+  }, [activeTab, userProfile?.role]);
+
   // Fonction pour afficher les notifications
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
     setNotification({ type, message });
@@ -2062,27 +2072,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   );
 
   const tabs = [
-    // Pour les clients, seulement l'onglet réservations et profil
-    ...(userProfile?.role === 'clients' ? [
-      { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
-      { id: 'profile', label: 'Mon Profil', icon: User }
-    ] : [
-      // Onglets de base pour tous les utilisateurs (admin et user)
-      { id: 'overview', label: t.tabs.overview, icon: BarChart3 },
-      { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
-      { id: 'reservationManagement', label: t.tabs.reservationManagement, icon: Calendar },
-      { id: 'spaces', label: 'Espaces', icon: Building },
-      { id: 'revenue', label: t.tabs.revenue, icon: DollarSign },
+    // Onglets de base pour tous les utilisateurs (admin et user)
+    { id: 'overview', label: t.tabs.overview, icon: BarChart3 },
+    { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
+    { id: 'reservationManagement', label: t.tabs.reservationManagement, icon: Calendar },
+    { id: 'spaces', label: 'Espaces', icon: Building },
+    { id: 'revenue', label: t.tabs.revenue, icon: DollarSign },
+    { id: 'statistics', label: t.tabs.statistics, icon: TrendingUp },
+    { id: 'aiFollowUps', label: 'Relances IA', icon: Brain },
+    // Onglets réservés aux administrateurs uniquement
+    ...(userProfile?.role === 'admin' ? [
       { id: 'clients', label: t.tabs.clients, icon: Users },
-      { id: 'statistics', label: t.tabs.statistics, icon: TrendingUp },
       { id: 'users', label: t.tabs.users, icon: Users },
-      { id: 'aiFollowUps', label: 'Relances IA', icon: Brain },
-      // Onglet audit réservé aux administrateurs uniquement
-      ...(userProfile?.role === 'admin' ? [
-        { id: 'audit', label: 'Audit', icon: BarChart3 }
-      ] : []),
-      { id: 'profile', label: 'Mon Profil', icon: User }
-    ])
+      { id: 'audit', label: 'Audit', icon: BarChart3 }
+    ] : []),
+    { id: 'profile', label: 'Mon Profil', icon: User }
   ];
   
   // Logs pour diagnostiquer les onglets
@@ -2268,7 +2272,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
               </div>
             )
           )}
-          {activeTab === 'clients' && (console.log('AUDIT_PAGE_VIEW','clients'), renderClients())}
+          {activeTab === 'clients' && userProfile?.role === 'admin' && (console.log('AUDIT_PAGE_VIEW','clients'), renderClients())}
           {activeTab === 'aiFollowUps' && <AIFollowUpManager language={language} />}
           {activeTab === 'profile' && (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -2446,7 +2450,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
             </div>
           )}
           {/* Onglet utilisateurs */}
-          {activeTab === 'users' && (
+          {activeTab === 'users' && userProfile?.role === 'admin' && (
             <UserManagement language={language} />
           )}
           

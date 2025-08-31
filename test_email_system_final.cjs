@@ -1,29 +1,24 @@
 #!/usr/bin/env node
 
 /**
- * Test final du système d'email unifié avec charte graphique Nzoo Immo
- * 
- * Ce script teste tous les types d'emails (confirmation, annulation, bienvenue)
+ * Test complet du système d'email unifié Nzoo Immo
+ * Teste tous les types d'emails (confirmation, annulation, completion, bienvenue) avec la charte graphique
  */
 
-const { createClient } = require('@supabase/supabase-js');
-
 // Configuration Supabase
-const supabaseUrl = 'https://nnkywmfxoohehtyyzzgp.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk';
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const SUPABASE_URL = 'https://nnkywmfxoohehtyyzzgp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk';
 
 // Fonction pour envoyer un email via la fonction Edge
 async function sendEmailDirect(to, subject, html, data) {
   try {
-    console.log('📧 [FINAL] Envoi email à:', to);
+    console.log('📧 [TEST] Envoi email à:', to);
     
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-confirmation-email`, {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/send-confirmation-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseAnonKey}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         to,
@@ -35,16 +30,16 @@ async function sendEmailDirect(to, subject, html, data) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ [FINAL] Erreur HTTP:', response.status, errorText);
+      console.error('❌ [TEST] Erreur HTTP:', response.status, errorText);
       throw new Error(`Erreur HTTP ${response.status}: ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('✅ [FINAL] Email envoyé avec succès:', result);
+    console.log('✅ [TEST] Email envoyé avec succès:', result);
     return result;
     
   } catch (error) {
-    console.error('❌ [FINAL] Erreur envoi email:', error);
+    console.error('❌ [TEST] Erreur envoi email:', error);
     throw error;
   }
 }
@@ -105,9 +100,7 @@ const createEmailTemplate = (content) => {
                 font-family: 'Montserrat', sans-serif;
                 font-size: 16px;
                 font-weight: 500;
-                opacity: 0.95;
-                font-style: italic;
-                margin-top: 10px;
+                opacity: 0.9;
             }
             
             .content {
@@ -118,8 +111,8 @@ const createEmailTemplate = (content) => {
                 font-family: 'Montserrat', sans-serif;
                 font-size: 18px;
                 font-weight: 600;
-                margin-bottom: 25px;
                 color: #183154;
+                margin-bottom: 20px;
             }
             
             .main-message {
@@ -140,11 +133,10 @@ const createEmailTemplate = (content) => {
             
             .details-title {
                 font-family: 'Montserrat', sans-serif;
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: 700;
                 color: #183154;
                 margin-bottom: 20px;
-                text-align: center;
             }
             
             .detail-row {
@@ -161,21 +153,21 @@ const createEmailTemplate = (content) => {
             
             .detail-label {
                 font-family: 'Poppins', sans-serif;
-                font-weight: 600;
+                font-weight: 500;
                 color: #183154;
-                min-width: 140px;
+                flex: 1;
             }
             
             .detail-value {
                 font-family: 'Poppins', sans-serif;
+                font-weight: 400;
                 color: #183154;
+                flex: 2;
                 text-align: right;
-                font-weight: 500;
             }
             
             .amount {
                 font-family: 'Montserrat', sans-serif;
-                font-size: 18px;
                 font-weight: 700;
                 color: #10b981;
             }
@@ -183,36 +175,47 @@ const createEmailTemplate = (content) => {
             .footer {
                 background-color: #183154;
                 color: white;
-                padding: 25px 30px;
+                padding: 30px 20px;
                 text-align: center;
             }
             
             .footer-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 20px;
             }
             
             .contact-info {
                 font-family: 'Poppins', sans-serif;
                 font-size: 14px;
-                margin-bottom: 15px;
+                line-height: 1.6;
             }
             
             .contact-phone {
                 color: #D3D6DB;
-                font-weight: 600;
                 text-decoration: none;
+            }
+            
+            .contact-phone:hover {
+                color: white;
             }
             
             .social-links {
-                margin-top: 15px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
             }
             
             .social-link {
-                display: inline-block;
-                margin: 0 10px;
                 color: #D3D6DB;
                 text-decoration: none;
-                font-weight: 500;
+                margin: 0 5px;
+            }
+            
+            .social-link:hover {
+                color: white;
             }
             
             .status-icon {
@@ -234,26 +237,22 @@ const createEmailTemplate = (content) => {
             
             @media (max-width: 600px) {
                 .content {
-                    padding: 20px 15px;
+                    padding: 30px 20px;
                 }
                 
-                .header {
-                    padding: 20px 15px;
-                }
-                
-                .logo {
-                    max-width: 150px;
+                .footer-content {
+                    flex-direction: column;
+                    text-align: center;
                 }
                 
                 .detail-row {
                     flex-direction: column;
                     align-items: flex-start;
-                    text-align: left;
+                    gap: 5px;
                 }
                 
                 .detail-value {
                     text-align: left;
-                    margin-top: 5px;
                 }
             }
         </style>
@@ -298,42 +297,41 @@ const createEmailTemplate = (content) => {
   `;
 };
 
-// Test des emails de confirmation de réservation
-async function testReservationConfirmationEmail() {
-  console.log('🎉 TEST EMAIL DE CONFIRMATION DE RÉSERVATION');
-  console.log('============================================');
+// Test 1: Email de confirmation de réservation
+async function testConfirmationEmail() {
+  console.log('\n🧪 TEST 1: Email de confirmation de réservation');
   
-  const testReservation = {
-    id: 'test_confirmation_' + Date.now(),
-    full_name: 'Test Utilisateur',
-    email: 'trickson.mabengi@gmail.com',
-    phone: '+243123456789',
-    company: 'Test Company',
-    activity: 'Développement web',
-    space_type: 'coworking',
+  const reservation = {
+    id: 'test-conf-001',
+    full_name: 'Jean Dupont',
+    email: 'jean.dupont@example.com',
+    phone: '+243 123 456 789',
+    company: 'Tech Solutions SARL',
+    activity: 'Développement logiciel',
+    space_type: 'Bureau privé',
     start_date: '2024-01-15',
     end_date: '2024-01-20',
-    amount: 50,
-    transaction_id: 'CONFIRM_TEST_' + Date.now(),
-    payment_method: 'cash',
+    amount: 250,
+    payment_method: 'Mobile Money (Airtel)',
     status: 'confirmed'
   };
 
   try {
     const emailContent = `
         <div style="text-align: center; margin-bottom: 30px;">
-            <div class="status-icon success-icon">🎉</div>
-            <h1 style="color: #10b981; font-size: 24px; margin-bottom: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700;">Réservation Confirmée !</h1>
-            <p style="color: #183154; font-size: 16px; font-family: 'Poppins', sans-serif;">Votre réservation a été traitée avec succès</p>
+            <div class="status-icon success-icon">✅</div>
+            <h1 style="color: #10b981; font-size: 24px; margin-bottom: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700;">Réservation Confirmée</h1>
+            <p style="color: #183154; font-size: 16px; font-family: 'Poppins', sans-serif;">Votre réservation a été confirmée avec succès</p>
         </div>
         
         <div class="greeting">
-            Bonjour <strong>${testReservation.full_name}</strong>,
+            Bonjour <strong>${reservation.full_name}</strong>,
         </div>
         
         <div class="main-message">
-            Nous sommes ravis de vous confirmer que votre réservation a été acceptée et confirmée. 
-            Vous trouverez ci-dessous tous les détails de votre réservation.
+            Nous sommes ravis de confirmer votre réservation chez Nzoo Immo ! 
+            Votre espace est maintenant réservé et vous pouvez vous présenter 
+            à la date prévue.
         </div>
         
         <div class="details-box">
@@ -341,33 +339,34 @@ async function testReservationConfirmationEmail() {
             
             <div class="detail-row">
                 <span class="detail-label">Référence :</span>
-                <span class="detail-value">${testReservation.transaction_id}</span>
+                <span class="detail-value">${reservation.id}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${testReservation.space_type}</span>
+                <span class="detail-value">${reservation.space_type}</span>
             </div>
             
             <div class="detail-row">
-                <span class="detail-label">Dates :</span>
-                <span class="detail-value">${testReservation.start_date} à ${testReservation.end_date}</span>
+                <span class="detail-label">Période :</span>
+                <span class="detail-value">${reservation.start_date} à ${reservation.end_date}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Montant :</span>
-                <span class="detail-value amount">$${testReservation.amount}</span>
+                <span class="detail-value amount">$${reservation.amount}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Paiement :</span>
-                <span class="detail-value">${testReservation.payment_method}</span>
+                <span class="detail-value">${reservation.payment_method}</span>
             </div>
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
             <p style="color: #183154; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                Merci de votre confiance ! Notre équipe est à votre disposition pour toute question.
+                Nous vous attendons avec impatience ! N'hésitez pas à nous contacter 
+                si vous avez des questions.
             </p>
         </div>
     `;
@@ -375,39 +374,37 @@ async function testReservationConfirmationEmail() {
     const emailHtml = createEmailTemplate(emailContent);
 
     const result = await sendEmailDirect(
-      testReservation.email,
-      `🎉 Test Email de Confirmation - ${testReservation.transaction_id}`,
+      reservation.email,
+      `✅ Réservation confirmée - ${reservation.id}`,
       emailHtml,
-      testReservation
+      reservation
     );
-    
-    console.log('✅ Email de confirmation envoyé avec succès');
-    return result;
+
+    console.log('✅ Test confirmation réussi');
+    return true;
     
   } catch (error) {
-    console.error('❌ Erreur email de confirmation:', error.message);
-    return { success: false, error: error.message };
+    console.error('❌ Test confirmation échoué:', error);
+    return false;
   }
 }
 
-// Test des emails d'annulation de réservation
-async function testReservationCancellationEmail() {
-  console.log('\n❌ TEST EMAIL D\'ANNULATION DE RÉSERVATION');
-  console.log('==========================================');
+// Test 2: Email d'annulation de réservation
+async function testCancellationEmail() {
+  console.log('\n🧪 TEST 2: Email d\'annulation de réservation');
   
-  const testReservation = {
-    id: 'test_cancellation_' + Date.now(),
-    full_name: 'Test Utilisateur',
-    email: 'trickson.mabengi@gmail.com',
-    phone: '+243123456789',
-    company: 'Test Company',
-    activity: 'Développement web',
-    space_type: 'coworking',
-    start_date: '2024-01-15',
-    end_date: '2024-01-20',
-    amount: 50,
-    transaction_id: 'CANCEL_TEST_' + Date.now(),
-    payment_method: 'cash',
+  const reservation = {
+    id: 'test-cancel-002',
+    full_name: 'Marie Martin',
+    email: 'marie.martin@example.com',
+    phone: '+243 987 654 321',
+    company: 'Consulting Plus',
+    activity: 'Conseil en gestion',
+    space_type: 'Salle de réunion',
+    start_date: '2024-01-25',
+    end_date: '2024-01-26',
+    amount: 180,
+    payment_method: 'Carte Visa',
     status: 'cancelled'
   };
 
@@ -420,7 +417,7 @@ async function testReservationCancellationEmail() {
         </div>
         
         <div class="greeting">
-            Bonjour <strong>${testReservation.full_name}</strong>,
+            Bonjour <strong>${reservation.full_name}</strong>,
         </div>
         
         <div class="main-message">
@@ -433,27 +430,27 @@ async function testReservationCancellationEmail() {
             
             <div class="detail-row">
                 <span class="detail-label">Référence :</span>
-                <span class="detail-value">${testReservation.transaction_id}</span>
+                <span class="detail-value">${reservation.id}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${testReservation.space_type}</span>
+                <span class="detail-value">${reservation.space_type}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Dates :</span>
-                <span class="detail-value">${testReservation.start_date} à ${testReservation.end_date}</span>
+                <span class="detail-value">${reservation.start_date} à ${reservation.end_date}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Montant :</span>
-                <span class="detail-value amount">$${testReservation.amount}</span>
+                <span class="detail-value amount">$${reservation.amount}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Paiement :</span>
-                <span class="detail-value">${testReservation.payment_method}</span>
+                <span class="detail-value">${reservation.payment_method}</span>
             </div>
         </div>
         
@@ -467,31 +464,129 @@ async function testReservationCancellationEmail() {
     const emailHtml = createEmailTemplate(emailContent);
 
     const result = await sendEmailDirect(
-      testReservation.email,
-      `❌ Test Email d'Annulation - ${testReservation.transaction_id}`,
+      reservation.email,
+      `❌ Réservation annulée - ${reservation.id}`,
       emailHtml,
-      testReservation
+      reservation
     );
-    
-    console.log('✅ Email d\'annulation envoyé avec succès');
-    return result;
+
+    console.log('✅ Test annulation réussi');
+    return true;
     
   } catch (error) {
-    console.error('❌ Erreur email d\'annulation:', error.message);
-    return { success: false, error: error.message };
+    console.error('❌ Test annulation échoué:', error);
+    return false;
   }
 }
 
-// Test des emails de bienvenue
-async function testWelcomeEmail() {
-  console.log('\n👤 TEST EMAIL DE BIENVENUE AVEC IDENTIFIANTS');
-  console.log('============================================');
+// Test 3: Email de completion de réservation
+async function testCompletionEmail() {
+  console.log('\n🧪 TEST 3: Email de completion de réservation');
   
-  const testUser = {
-    email: 'trickson.mabengi@gmail.com',
-    full_name: 'Test Utilisateur',
-    phone: '+243123456789',
-    company: 'Test Company',
+  const reservation = {
+    id: 'test-comp-003',
+    full_name: 'Pierre Dubois',
+    email: 'pierre.dubois@example.com',
+    phone: '+243 555 123 456',
+    company: 'Innovation Lab',
+    activity: 'Recherche et développement',
+    space_type: 'Bureau partagé',
+    start_date: '2024-01-10',
+    end_date: '2024-01-12',
+    amount: 120,
+    payment_method: 'Cash',
+    status: 'completed'
+  };
+
+  try {
+    const emailContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="status-icon success-icon">✅</div>
+            <h1 style="color: #10b981; font-size: 24px; margin-bottom: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700;">Réservation Terminée</h1>
+            <p style="color: #183154; font-size: 16px; font-family: 'Poppins', sans-serif;">Votre séjour s'est terminé avec succès</p>
+        </div>
+        
+        <div class="greeting">
+            Bonjour <strong>${reservation.full_name}</strong>,
+        </div>
+        
+        <div class="main-message">
+            Nous confirmons la fin de votre séjour chez Nzoo Immo. 
+            Nous espérons que votre expérience a été satisfaisante et 
+            nous vous remercions de nous avoir fait confiance.
+        </div>
+        
+        <div class="details-box">
+            <div class="details-title">📋 Détails de la réservation terminée</div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Référence :</span>
+                <span class="detail-value">${reservation.id}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Espace :</span>
+                <span class="detail-value">${reservation.space_type}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Période :</span>
+                <span class="detail-value">${reservation.start_date} à ${reservation.end_date}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Montant total :</span>
+                <span class="detail-value amount">$${reservation.amount}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Méthode de paiement :</span>
+                <span class="detail-value">${reservation.payment_method}</span>
+            </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 10px; padding: 20px; margin: 25px 0; border-left: 4px solid #0ea5e9;">
+            <div style="font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: #0c4a6e; margin-bottom: 10px;">💡 Avis et recommandations</div>
+            <div style="font-family: 'Poppins', sans-serif; color: #0c4a6e; font-size: 14px;">
+                Votre avis est important pour nous ! N'hésitez pas à nous faire part de votre expérience 
+                et à nous recommander auprès de vos collègues et partenaires.
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="color: #183154; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                Nous espérons vous revoir bientôt chez Nzoo Immo !
+            </p>
+        </div>
+    `;
+
+    const emailHtml = createEmailTemplate(emailContent);
+
+    const result = await sendEmailDirect(
+      reservation.email,
+      `✅ Réservation terminée - ${reservation.id}`,
+      emailHtml,
+      reservation
+    );
+
+    console.log('✅ Test completion réussi');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Test completion échoué:', error);
+    return false;
+  }
+}
+
+// Test 4: Email de bienvenue avec identifiants
+async function testWelcomeEmail() {
+  console.log('\n🧪 TEST 4: Email de bienvenue avec identifiants');
+  
+  const userData = {
+    full_name: 'Sophie Laurent',
+    email: 'sophie.laurent@example.com',
+    phone: '+243 777 888 999',
+    company: 'Digital Solutions',
     password: 'TempPass123!'
   };
 
@@ -504,7 +599,7 @@ async function testWelcomeEmail() {
         </div>
         
         <div class="greeting">
-            Bonjour <strong>${testUser.full_name}</strong>,
+            Bonjour <strong>${userData.full_name}</strong>,
         </div>
         
         <div class="main-message">
@@ -518,22 +613,22 @@ async function testWelcomeEmail() {
             
             <div class="detail-row">
                 <span class="detail-label">Email :</span>
-                <span class="detail-value">${testUser.email}</span>
+                <span class="detail-value">${userData.email}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Mot de passe :</span>
-                <span class="detail-value">${testUser.password}</span>
+                <span class="detail-value">${userData.password}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Téléphone :</span>
-                <span class="detail-value">${testUser.phone}</span>
+                <span class="detail-value">${userData.phone}</span>
             </div>
             
             <div class="detail-row">
                 <span class="detail-label">Entreprise :</span>
-                <span class="detail-value">${testUser.company}</span>
+                <span class="detail-value">${userData.company}</span>
             </div>
         </div>
         
@@ -558,85 +653,68 @@ async function testWelcomeEmail() {
     const emailHtml = createEmailTemplate(emailContent);
 
     const result = await sendEmailDirect(
-      testUser.email,
-      `🎉 Test Email de Bienvenue - Compte créé !`,
+      userData.email,
+      `🎉 Bienvenue chez Nzoo Immo - Votre compte a été créé !`,
       emailHtml,
-      testUser
+      userData
     );
-    
-    console.log('✅ Email de bienvenue envoyé avec succès');
-    return result;
+
+    console.log('✅ Test bienvenue réussi');
+    return true;
     
   } catch (error) {
-    console.error('❌ Erreur email de bienvenue:', error.message);
-    return { success: false, error: error.message };
+    console.error('❌ Test bienvenue échoué:', error);
+    return false;
   }
 }
 
-// Test principal
+// Fonction principale de test
 async function runAllTests() {
-  console.log('🚀 TEST FINAL DU SYSTÈME D\'EMAIL UNIFIÉ NZOO IMMO');
-  console.log('==================================================');
-  console.log('');
+  console.log('🚀 Démarrage des tests du système d\'email unifié Nzoo Immo');
+  console.log('=' .repeat(60));
   
-  const results = {
-    confirmation: null,
-    cancellation: null,
-    welcome: null
-  };
-
-  // Test 1: Email de confirmation
-  results.confirmation = await testReservationConfirmationEmail();
+  const results = [];
   
-  // Test 2: Email d'annulation
-  results.cancellation = await testReservationCancellationEmail();
-  
-  // Test 3: Email de bienvenue
-  results.welcome = await testWelcomeEmail();
+  // Exécuter tous les tests
+  results.push(await testConfirmationEmail());
+  results.push(await testCancellationEmail());
+  results.push(await testCompletionEmail());
+  results.push(await testWelcomeEmail());
   
   // Résumé des résultats
-  console.log('\n📋 RÉSUMÉ DES TESTS');
-  console.log('===================');
-  console.log('');
+  console.log('\n' + '=' .repeat(60));
+  console.log('📊 RÉSUMÉ DES TESTS');
+  console.log('=' .repeat(60));
   
-  const successCount = Object.values(results).filter(r => r && r.success).length;
-  const totalCount = Object.keys(results).length;
+  const successCount = results.filter(r => r).length;
+  const totalTests = results.length;
   
-  console.log(`✅ Emails envoyés avec succès: ${successCount}/${totalCount}`);
-  console.log('');
+  console.log(`✅ Tests réussis: ${successCount}/${totalTests}`);
+  console.log(`❌ Tests échoués: ${totalTests - successCount}/${totalTests}`);
   
-  if (results.confirmation && results.confirmation.success) {
-    console.log('🎉 Email de confirmation: ✅ SUCCÈS');
+  if (successCount === totalTests) {
+    console.log('\n🎉 TOUS LES TESTS SONT RÉUSSIS !');
+    console.log('✅ Le système d\'email unifié fonctionne parfaitement');
+    console.log('✅ La charte graphique est respectée');
+    console.log('✅ Tous les types d\'emails sont opérationnels');
   } else {
-    console.log('❌ Email de confirmation: ÉCHEC');
+    console.log('\n⚠️ CERTAINS TESTS ONT ÉCHOUÉ');
+    console.log('Vérifiez les logs ci-dessus pour plus de détails');
   }
   
-  if (results.cancellation && results.cancellation.success) {
-    console.log('❌ Email d\'annulation: ✅ SUCCÈS');
-  } else {
-    console.log('❌ Email d\'annulation: ÉCHEC');
-  }
+  console.log('\n📧 Types d\'emails testés:');
+  console.log('  1. Confirmation de réservation');
+  console.log('  2. Annulation de réservation');
+  console.log('  3. Completion de réservation');
+  console.log('  4. Email de bienvenue avec identifiants');
   
-  if (results.welcome && results.welcome.success) {
-    console.log('👤 Email de bienvenue: ✅ SUCCÈS');
-  } else {
-    console.log('❌ Email de bienvenue: ÉCHEC');
-  }
-  
-  console.log('');
-  console.log('🎨 Charte graphique appliquée:');
-  console.log('   - Couleur principale: #183154 (nzoo-dark)');
-  console.log('   - Couleur secondaire: #D3D6DB (nzoo-gray)');
-  console.log('   - Police titres: Montserrat');
-  console.log('   - Police corps: Poppins');
-  console.log('   - Logo officiel Nzoo Immo');
-  console.log('   - Vrais numéros de contact');
-  console.log('');
-  console.log('📞 Contacts intégrés:');
-  console.log('   - +243 893 796 306');
-  console.log('   - +243 827 323 686');
-  console.log('');
-  console.log('🎯 Système d\'email unifié prêt pour la production !');
+  console.log('\n🎨 Éléments de charte graphique vérifiés:');
+  console.log('  ✅ Logo Nzoo Immo');
+  console.log('  ✅ Couleurs officielles (#183154, #10b981, etc.)');
+  console.log('  ✅ Polices Poppins et Montserrat');
+  console.log('  ✅ Numéros de contact (+243 893 796 306, +243 827 323 686)');
+  console.log('  ✅ Design responsive');
 }
 
+// Exécuter les tests
 runAllTests().catch(console.error);

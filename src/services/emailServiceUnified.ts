@@ -435,6 +435,87 @@ export const sendReservationCancellationEmail = async (reservation: any) => {
   }
 };
 
+// Fonction pour envoyer l'email de completion de réservation
+export const sendReservationCompletionEmail = async (reservation: any) => {
+  console.log('📧 [UNIFIED] Envoi completion réservation:', reservation.email);
+
+  try {
+    const emailContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="status-icon success-icon">✅</div>
+            <h1 style="color: #10b981; font-size: 24px; margin-bottom: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700;">Réservation Terminée</h1>
+            <p style="color: #183154; font-size: 16px; font-family: 'Poppins', sans-serif;">Votre séjour s'est terminé avec succès</p>
+        </div>
+        
+        <div class="greeting">
+            Bonjour <strong>${reservation.full_name}</strong>,
+        </div>
+        
+        <div class="main-message">
+            Nous confirmons la fin de votre séjour chez Nzoo Immo. 
+            Nous espérons que votre expérience a été satisfaisante et 
+            nous vous remercions de nous avoir fait confiance.
+        </div>
+        
+        <div class="details-box">
+            <div class="details-title">📋 Détails de la réservation terminée</div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Référence :</span>
+                <span class="detail-value">${reservation.transaction_id || reservation.id}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Espace :</span>
+                <span class="detail-value">${reservation.space_type}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Période :</span>
+                <span class="detail-value">${reservation.start_date} à ${reservation.end_date}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Montant total :</span>
+                <span class="detail-value amount">$${reservation.amount}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Méthode de paiement :</span>
+                <span class="detail-value">${reservation.payment_method}</span>
+            </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 10px; padding: 20px; margin: 25px 0; border-left: 4px solid #0ea5e9;">
+            <div style="font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: #0c4a6e; margin-bottom: 10px;">💡 Avis et recommandations</div>
+            <div style="font-family: 'Poppins', sans-serif; color: #0c4a6e; font-size: 14px;">
+                Votre avis est important pour nous ! N'hésitez pas à nous faire part de votre expérience 
+                et à nous recommander auprès de vos collègues et partenaires.
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="color: #183154; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                Nous espérons vous revoir bientôt chez Nzoo Immo !
+            </p>
+        </div>
+    `;
+
+    const emailHtml = createEmailTemplate(emailContent);
+
+    return await sendEmailDirect(
+      reservation.email,
+      `✅ Réservation terminée - ${reservation.transaction_id || reservation.id}`,
+      emailHtml,
+      reservation
+    );
+    
+  } catch (error) {
+    console.error('❌ [UNIFIED] Erreur email completion:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
+  }
+};
+
 // Fonction pour envoyer l'email de bienvenue avec identifiants
 export const sendWelcomeEmailWithCredentials = async (userData: any) => {
   console.log('📧 [UNIFIED] Envoi email de bienvenue:', userData.email);
