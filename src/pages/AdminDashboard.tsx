@@ -1715,9 +1715,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   // Fonctions pour la modification des réservations
   const handleEditReservation = (reservation: any) => {
     console.log('🔍 [MODAL] Ouverture du modal de modification pour la réservation:', reservation);
+    console.log('🔍 [DEBUG] Réservation reçue:', reservation);
+    console.log('🔍 [DEBUG] ID de la réservation:', reservation.id);
+    console.log('🔍 [DEBUG] Type de l\'ID:', typeof reservation.id);
+    
+    // Vérifier que la réservation est valide
+    if (!reservation || !reservation.id) {
+      console.error('❌ [DEBUG] Réservation invalide reçue:', reservation);
+      showNotification('error', 'Réservation invalide');
+      return;
+    }
     
     setEditingReservation(reservation);
-    setEditReservationFormData({
+    
+    // Initialiser les données du formulaire avec validation
+    const formData = {
       full_name: reservation.full_name || '',
       email: reservation.email || '',
       phone: reservation.phone || '',
@@ -1734,33 +1746,73 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       status: reservation.status || 'pending',
       notes: reservation.notes || '',
       admin_notes: reservation.admin_notes || ''
-    });
+    };
+    
+    setEditReservationFormData(formData);
     
     console.log('🔍 [MODAL] Données du formulaire initialisées:', {
-      full_name: reservation.full_name || '',
-      email: reservation.email || '',
-      activity: reservation.activity || '',
-      space_type: reservation.space_type || 'coworking'
+      full_name: formData.full_name,
+      email: formData.email,
+      activity: formData.activity,
+      space_type: formData.space_type,
+      id: reservation.id
+    });
+    
+    // Vérifier l'état avant ouverture
+    console.log('🔍 [MODAL] État avant ouverture:', {
+      isEditReservationModalOpen,
+      editingReservation: !!editingReservation
     });
     
     setIsEditReservationModalOpen(true);
+    
+    // Vérifier l'état après ouverture
+    console.log('🔍 [MODAL] État après ouverture:', {
+      isEditReservationModalOpen: true,
+      editingReservation: !!editingReservation
+    });
+    
     console.log('🔍 [MODAL] Modal ouvert, isEditReservationModalOpen = true');
   };
 
   const handleEditReservationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setEditReservationFormData(prev => ({
-      ...prev,
-      [name]: name === 'amount' || name === 'occupants' ? Number(value) : value
-    }));
+    
+    console.log('🔍 [INPUT] Changement détecté:', { name, value });
+    
+    setEditReservationFormData(prev => {
+      const newState = {
+        ...prev,
+        [name]: name === 'amount' || name === 'occupants' ? Number(value) : value
+      };
+      
+      console.log('🔍 [STATE] Nouvel état:', newState);
+      return newState;
+    });
   };
 
   const handleSaveReservation = async () => {
+    // Log de l'état complet avant sauvegarde
+    console.log('🔍 État complet avant sauvegarde:', {
+      editingReservation,
+      editReservationFormData,
+      isSavingReservation,
+      isEditReservationModalOpen
+    });
+    
     if (!editingReservation) {
       console.error('❌ Aucune réservation en cours de modification');
       showNotification('error', 'Aucune réservation sélectionnée');
       return;
     }
+    
+    // Vérification des données
+    console.log('🔍 [SAVE] Vérification des données:', {
+      hasEditingReservation: !!editingReservation,
+      editingReservationId: editingReservation?.id,
+      formDataKeys: Object.keys(editReservationFormData),
+      formDataValues: editReservationFormData
+    });
     
     console.log('🔍 Début de la sauvegarde de la réservation:', {
       reservationId: editingReservation.id,
@@ -1848,13 +1900,55 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       }
 
       showNotification('success', 'Réservation mise à jour avec succès');
+      
+      // Vérification que les données ont bien été mises à jour
+      if (updateResult && updateResult.length > 0) {
+        const updatedReservation = updateResult[0];
+        console.log('📋 Réservation mise à jour:', updatedReservation);
+        
+        // Vérification des champs critiques
+        const criticalFields = ['full_name', 'email', 'phone', 'status'] as const;
+        const verificationResults = criticalFields.map(field => ({
+          field,
+          expected: updateData[field],
+          actual: updatedReservation[field],
+          match: updateData[field] === updatedReservation[field]
+        }));
+        
+        console.log('🔍 Vérification des champs critiques:', verificationResults);
+        
+        const mismatchedFields = verificationResults.filter(r => !r.match);
+        if (mismatchedFields.length > 0) {
+          console.warn('⚠️ Certains champs ne correspondent pas:', mismatchedFields);
+        }
+      }
+      
+      // Fermeture du modal avec logs
+      console.log('🔍 [MODAL] Fermeture du modal...');
       setIsEditReservationModalOpen(false);
       setEditingReservation(null);
+      console.log('🔍 [MODAL] État après fermeture:', {
+        isEditReservationModalOpen: false,
+        editingReservation: null
+      });
       
-      // Recharger les réservations
+      // Rechargement forcé des réservations
       console.log('🔄 Rechargement des réservations...');
       try {
+        // Recharger immédiatement
         await refetch();
+        console.log('🔄 Premier rechargement effectué');
+        
+        // Recharger aussi après un délai pour s'assurer de la synchronisation
+        setTimeout(async () => {
+          try {
+            await refetch();
+            console.log('🔄 Rechargement différé effectué');
+          } catch (delayedRefetchError) {
+            console.error('❌ Erreur lors du rechargement différé:', delayedRefetchError);
+          }
+        }, 1000);
+        
         console.log('✅ Réservations rechargées avec succès');
       } catch (refetchError) {
         console.error('❌ Erreur lors du rechargement:', refetchError);
@@ -1863,6 +1957,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde:', error);
+      
+      // Log détaillé de l'erreur
+      if (error instanceof Error) {
+        console.error('   Message:', error.message);
+        console.error('   Stack:', error.stack);
+      } else {
+        console.error('   Type d\'erreur:', typeof error);
+        console.error('   Contenu:', error);
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       showNotification('error', `Erreur lors de la sauvegarde: ${errorMessage}`);
     } finally {

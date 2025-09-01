@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Logo Facture - Nzoo Immo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #183154 0%, #1e4a7a 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            background: white;
+            border: 3px solid white;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .test-info {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #f1f3f4;
+        }
+        
+        .test-info h3 {
+            color: #183154;
+            margin-bottom: 15px;
+        }
+        
+        .test-info ul {
+            margin-left: 20px;
+            color: #666;
+        }
+        
+        .test-info li {
+            margin-bottom: 8px;
+        }
+        
+        .logo-test {
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .logo-test h3 {
+            color: #183154;
+            margin-bottom: 20px;
+        }
+        
+        .logo-display {
+            display: inline-block;
+            width: 120px;
+            height: 120px;
+            background: white;
+            border: 3px solid #183154;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(24, 49, 84, 0.2);
+        }
+        
+        .logo-display img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .status.success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status.error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="logo">
+                <img src="/logo_nzooimmo.svg" alt="N'zoo Immo Logo" id="logo-test">
+            </div>
+            <h1>FACTURE</h1>
+            <p>N'zoo Immo - Espaces de Travail</p>
+        </div>
+        
+        <div class="test-info">
+            <h3>🧪 Test du Logo dans les Factures</h3>
+            <ul>
+                <li><strong>Problème identifié :</strong> Le logo ne s'affichait pas dans les factures</li>
+                <li><strong>Cause :</strong> Chemin incorrect vers le fichier logo</li>
+                <li><strong>Solution appliquée :</strong> Création d'un logo SVG compatible et correction des chemins</li>
+                <li><strong>Fichiers modifiés :</strong> <code>src/services/invoiceService.ts</code></li>
+            </ul>
+        </div>
+        
+        <div class="logo-test">
+            <h3>🎯 Test d'Affichage du Logo</h3>
+            
+            <div class="logo-display">
+                <img src="/logo_nzooimmo.svg" alt="Logo SVG" id="logo-svg">
+                <div class="status" id="status-svg">Chargement...</div>
+            </div>
+            
+            <div class="logo-display">
+                <img src="/logo_nzooimmo.png" alt="Logo PNG" id="logo-png">
+                <div class="status" id="status-png">Chargement...</div>
+            </div>
+            
+            <div class="logo-display">
+                <img src="/logo.jpg" alt="Logo JPG (ancien)" id="logo-jpg">
+                <div class="status" id="status-jpg">Chargement...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Test de chargement des logos
+        function testLogo(imgElement, statusElement, logoType) {
+            imgElement.onload = function() {
+                statusElement.textContent = '✅ Chargé avec succès';
+                statusElement.className = 'status success';
+            };
+            
+            imgElement.onerror = function() {
+                statusElement.textContent = '❌ Erreur de chargement';
+                statusElement.className = 'status error';
+            };
+        }
+        
+        // Tester tous les logos
+        testLogo(document.getElementById('logo-svg'), document.getElementById('status-svg'), 'SVG');
+        testLogo(document.getElementById('logo-png'), document.getElementById('status-png'), 'PNG');
+        testLogo(document.getElementById('logo-jpg'), document.getElementById('status-jpg'), 'JPG');
+        
+        // Test principal du logo de la facture
+        testLogo(document.getElementById('logo-test'), document.createElement('div'), 'Facture');
+        
+        console.log('🧪 Test des logos démarré');
+        console.log('📁 Logo SVG:', '/logo_nzooimmo.svg');
+        console.log('📁 Logo PNG:', '/logo_nzooimmo.png');
+        console.log('📁 Logo JPG (ancien):', '/logo.jpg');
+    </script>
+</body>
+</html>

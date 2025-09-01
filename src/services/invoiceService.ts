@@ -405,7 +405,7 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
       <div class="invoice-container">
         <div class="header">
           <div class="logo">
-            <img src="/logo.jpg" alt="N'zoo Immo Logo">
+            <img src="/logo_nzooimmo.png" alt="N'zoo Immo Logo" onerror="this.src='/logo_nzooimmo.svg'; this.onerror=null;">
           </div>
           <h1>FACTURE</h1>
           <p>N'zoo Immo - Espaces de Travail</p>
@@ -537,7 +537,7 @@ export const generateAndDownloadReservationInvoice = async (reservationData: Res
       city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com",
-      logo: "/logo.jpg"
+      logo: "/logo_nzooimmo.png"
     };
 
     // Générer le HTML de la facture
@@ -999,7 +999,7 @@ export const generateAndDownloadInvoice = async (reservation: Reservation): Prom
       city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com",
-      logo: "/logo.jpg" // Chemin vers le logo JPG dans public
+      logo: "/logo_nzooimmo.png" // Chemin vers le logo PNG dans public
     };
 
     const invoiceData: InvoiceData = {

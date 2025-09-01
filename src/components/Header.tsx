@@ -217,6 +217,7 @@ const Header: React.FC<HeaderProps> = ({ language, setLanguage, isAuthenticated,
                    )}
                  </Link>
               )}
+              
             </nav>
 
             {/* Right side controls */}
@@ -369,6 +370,7 @@ const Header: React.FC<HeaderProps> = ({ language, setLanguage, isAuthenticated,
                      Admin
                    </Link>
                 )}
+                
               </nav>
 
               {/* Mobile Language Switcher */}

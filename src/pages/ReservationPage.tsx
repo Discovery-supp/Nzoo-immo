@@ -131,9 +131,10 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
   // useEffect pour vérifier la disponibilité générale de l'espace
   useEffect(() => {
     const checkSpaceGeneralAvailability = async () => {
-      if (selectedSpace === 'bureau-prive') {
+      // Vérifier la disponibilité uniquement pour Coworking et Bureau privé
+      if (selectedSpace === 'coworking' || selectedSpace === 'bureau-prive') {
         try {
-          const availability = await checkGeneralSpaceAvailability('bureau-prive');
+          const availability = await checkGeneralSpaceAvailability(selectedSpace);
           setSpaceAvailability({
             isAvailable: availability.isAvailable,
             message: availability.message
@@ -144,7 +145,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           setSpaceAvailability({ isAvailable: true });
         }
       } else {
-        // Pour les autres types d'espaces, considérer comme disponible
+        // Pour les autres types d'espaces (domiciliation, salle de réunion), considérer comme toujours disponible
         setSpaceAvailability({ isAvailable: true });
       }
     };
@@ -191,6 +192,20 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
     try {
       setAvailabilityLoading(true);
       setAvailabilityError(null);
+      
+      // Vérifier la disponibilité uniquement pour Coworking et Bureau privé
+      if (selectedSpace !== 'coworking' && selectedSpace !== 'bureau-prive') {
+        // Pour les autres espaces (domiciliation, salle de réunion), toujours disponible
+        setAvailabilityCheck({
+          isAvailable: true,
+          conflictingReservations: 0,
+          maxCapacity: 999,
+          message: 'Espace toujours disponible'
+        });
+        setSuggestedDates([]);
+        setAvailabilityError(null);
+        return true;
+      }
       
       const startDateStr = startDate.toISOString().split('T')[0];
       const endDateStr = endDate.toISOString().split('T')[0];
@@ -802,7 +817,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
       return;
     }
     
-    if (!spaceAvailability.isAvailable) {
+    // Vérifier la disponibilité uniquement pour Coworking et Bureau privé
+    if ((selectedSpace === 'coworking' || selectedSpace === 'bureau-prive') && !spaceAvailability.isAvailable) {
       console.log('❌ [DEBUG] Espace non disponible');
       setReservationError('Cet espace n\'est pas disponible pour les dates sélectionnées');
       return;
@@ -909,11 +925,14 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
   // Fonction de validation des étapes
   const validateStep = (step: number) => {
+    // Pour les espaces autres que Coworking et Bureau privé, ne pas vérifier la disponibilité
+    const shouldCheckAvailability = selectedSpace === 'coworking' || selectedSpace === 'bureau-prive';
+    
     switch (step) {
       case 1:
-        return selectedDates !== null && spaceAvailability.isAvailable;
+        return selectedDates !== null && (shouldCheckAvailability ? spaceAvailability.isAvailable : true);
       case 2:
-        return formData.fullName && formData.email && formData.phone && formData.activity && formData.activity.trim() !== '' && spaceAvailability.isAvailable;
+        return formData.fullName && formData.email && formData.phone && formData.activity && formData.activity.trim() !== '' && (shouldCheckAvailability ? spaceAvailability.isAvailable : true);
       case 3:
         return selectedPaymentMethod !== null;
       default:
@@ -1011,8 +1030,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
 
 
-        {/* Alerte de disponibilité pour les bureaux privés */}
-        {selectedSpace === 'bureau-prive' && !spaceAvailability.isAvailable && (
+        {/* Alerte de disponibilité pour Coworking et Bureaux privés uniquement */}
+        {(selectedSpace === 'bureau-prive' || selectedSpace === 'coworking') && !spaceAvailability.isAvailable && (
           <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-2xl">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mr-4 shadow-soft">
@@ -1020,10 +1039,10 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
               </div>
               <div>
                 <p className="font-semibold text-red-800 font-body">
-                  Bureaux privés actuellement indisponibles
+                  {selectedSpace === 'bureau-prive' ? 'Bureaux privés' : 'Espace Coworking'} actuellement indisponibles
                 </p>
                 <p className="text-sm text-red-600 font-body">
-                  {spaceAvailability.message || 'Tous les bureaux privés sont actuellement occupés. Veuillez réessayer plus tard.'}
+                  {spaceAvailability.message || `Tous les ${selectedSpace === 'bureau-prive' ? 'bureaux privés' : 'espaces coworking'} sont actuellement occupés. Veuillez réessayer plus tard.`}
                 </p>
               </div>
             </div>
@@ -1096,8 +1115,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           </div>
         </div>
 
-        {/* Loading state */}
-        {availabilityLoading && (
+        {/* Loading state - uniquement pour Coworking et Bureau privé */}
+        {availabilityLoading && (selectedSpace === 'coworking' || selectedSpace === 'bureau-prive') && (
           <div className="flex items-center justify-center p-6 bg-primary-50 rounded-2xl border border-primary-200">
             <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full mr-3"></div>
             <span className="text-primary-700 font-medium font-body">
@@ -1109,7 +1128,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         {/* Affichage de la période sélectionnée */}
         {selectedDates && !availabilityLoading && (
           <div className={`mt-6 p-6 rounded-2xl border ${
-            availabilityError 
+            (availabilityError && (selectedSpace === 'coworking' || selectedSpace === 'bureau-prive'))
               ? 'border-red-200 bg-red-50' 
               : 'border-green-200 bg-green-50'
           }`}>
@@ -1136,7 +1155,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                   )}
                 </p>
                 <p className={`text-sm mt-2 ${
-                  availabilityError ? 'text-red-600' : 'text-green-600'
+                  (availabilityError && (selectedSpace === 'coworking' || selectedSpace === 'bureau-prive')) ? 'text-red-600' : 'text-green-600'
                 }`}>
                   {language === 'fr' 
                     ? `Durée : ${calculateSelectedDays()} jour${calculateSelectedDays() > 1 ? 's' : ''}`
@@ -1159,8 +1178,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
               </div>
             </div>
 
-            {/* Message d'erreur de disponibilité */}
-            {availabilityError && (
+            {/* Message d'erreur de disponibilité - uniquement pour Coworking et Bureau privé */}
+            {availabilityError && (selectedSpace === 'coworking' || selectedSpace === 'bureau-prive') && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
                 <p className="text-red-700 font-medium mb-3">{availabilityError}</p>
                 
@@ -1177,10 +1196,10 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                           onClick={() => handleSuggestedDateSelect(suggestedDate)}
                           className="w-full p-3 bg-white border border-green-200 rounded-lg hover:bg-green-50 transition-colors text-left"
                         >
-                          <p className="font-medium text-green-800">
+                          <p className="text-red-800">
                             {new Date(suggestedDate.start).toLocaleDateString('fr-FR')} - {new Date(suggestedDate.end).toLocaleDateString('fr-FR')}
                           </p>
-                          <p className="text-sm text-green-600">
+                          <p className="text-sm text-red-600">
                             {language === 'fr' ? 'Cliquez pour sélectionner' : 'Click to select'}
                           </p>
                         </button>
@@ -1925,7 +1944,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                         <button
                           type="submit"
                           className="px-6 py-3 bg-gradient-nzoo text-white rounded-xl hover:shadow-nzoo-hover disabled:opacity-50 transition-all duration-300 font-medium ml-auto font-poppins shadow-soft"
-                          disabled={!validateStep(currentStep) || paymentLoading || !spaceAvailability.isAvailable}
+                          disabled={!validateStep(currentStep) || paymentLoading || ((selectedSpace === 'coworking' || selectedSpace === 'bureau-prive') && !spaceAvailability.isAvailable)}
                         >
                           <span className="flex items-center space-x-2">
                             <span>{t.buttons.next}</span>
@@ -1938,7 +1957,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                           type="button"
                           onClick={handleReservation}
                           className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-nzoo-hover disabled:opacity-50 transition-all duration-300 font-medium ml-auto font-poppins shadow-soft"
-                          disabled={paymentProcessing || paymentLoading || !selectedPaymentMethod || !spaceAvailability.isAvailable}
+                          disabled={paymentProcessing || paymentLoading || !selectedPaymentMethod || ((selectedSpace === 'coworking' || selectedSpace === 'bureau-prive') && !spaceAvailability.isAvailable)}
                         >
                           <span className="flex items-center space-x-2">
                             {paymentProcessing || paymentLoading ? (
@@ -1948,8 +1967,8 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                             ) : (
                               <>
                                 <span>
-                                  {!spaceAvailability.isAvailable && selectedSpace === 'bureau-prive' 
-                                    ? 'Bureaux indisponibles' 
+                                  {!spaceAvailability.isAvailable && (selectedSpace === 'bureau-prive' || selectedSpace === 'coworking')
+                                    ? (selectedSpace === 'bureau-prive' ? 'Bureaux indisponibles' : 'Coworking indisponible')
                                     : selectedPaymentMethod === 'CASH' 
                                       ? t.buttons.reserve 
                                       : t.buttons.pay

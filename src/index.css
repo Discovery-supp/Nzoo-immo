@@ -142,13 +142,28 @@
   @apply mb-4;
 }
 
+/* Style spécifique pour le bouton du mois */
+.react-calendar__navigation__label {
+  @apply text-yellow-300 font-bold text-lg;
+}
+
 .react-calendar__navigation button {
-  @apply bg-nzoo-dark text-white rounded-xl px-4 py-2 hover:bg-nzoo-dark-lighter transition-colors duration-200 font-semibold;
+  @apply bg-blue-800 text-yellow-300 rounded-xl px-4 py-2 hover:bg-blue-700 transition-colors duration-200 font-semibold;
   min-width: 44px;
 }
 
 .react-calendar__navigation button:disabled {
   @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+}
+
+/* Styles pour les flèches de navigation */
+.react-calendar__navigation__arrow {
+  @apply text-yellow-300 font-bold;
+}
+
+/* Amélioration de la visibilité des boutons de navigation */
+.react-calendar__navigation button:hover {
+  @apply text-yellow-200 shadow-lg;
 }
 
 .react-calendar__month-view__weekdays {
