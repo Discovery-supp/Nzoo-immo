@@ -266,7 +266,7 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
 
   const formatSpaceType = (spaceType: string) => {
     const types = {
-      'coworking': 'Coworking',
+      'coworking': 'Espace Coworking',
       'bureau-prive': 'Bureau Privé',
   
     };

@@ -47,6 +47,8 @@ export interface Reservation extends BaseEntity {
   // Nouveaux champs pour la gestion différenciée des offres
   contract_accepted?: boolean; // Pour les offres sans gestion de dates
   selected_months?: number; // Nombre de mois sélectionnés pour les abonnements
+  // Champ pour lier la réservation au compte client
+  client_id?: string | null;
 }
 
 export interface ReservationData {

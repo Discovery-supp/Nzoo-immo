@@ -19,8 +19,30 @@ export const useReservations = (filterByUser?: { email: string; role: string }) 
       
       // Appliquer le filtre si nécessaire
       if (filterByUser && filterByUser.role === 'clients' && filterByUser.email) {
-        console.log('🔒 Filtrage pour client:', filterByUser.email);
-        query = query.eq('email', filterByUser.email);
+        console.log('🔒 Filtrage pour client par client_id:', filterByUser.email);
+        // D'abord, récupérer le client_id de l'utilisateur
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('email', filterByUser.email)
+          .single();
+        
+        if (clientError) {
+          console.error('❌ Erreur récupération client:', clientError);
+          setError('Erreur lors de la récupération du compte client');
+          setReservations([]);
+          return;
+        }
+        
+        if (clientData) {
+          // Filtrer par client_id au lieu de l'email
+          query = query.eq('client_id', clientData.id);
+          console.log('🔒 Filtrage par client_id:', clientData.id);
+        } else {
+          console.log('⚠️ Aucun compte client trouvé pour:', filterByUser.email);
+          setReservations([]);
+          return;
+        }
       } else {
         console.log('📋 Chargement de toutes les réservations');
       }
@@ -65,6 +87,7 @@ export const useReservations = (filterByUser?: { email: string; role: string }) 
         status: item.status || 'pending',
         notes: item.notes || '',
         admin_notes: item.admin_notes || '',
+        client_id: item.client_id || null,
         created_at: item.created_at || '',
         updated_at: item.updated_at || ''
       }));

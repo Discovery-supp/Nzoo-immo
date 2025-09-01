@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Building, Calendar, Edit3, Save, X, Eye, EyeOff, Shield, Crown, Camera, MapPin, Briefcase } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { profileService } from '../services/profileService';
+import { getFormattedSpaceText } from '../utils/spaceDisplayHelper';
 
 interface ClientProfilePageProps {
   language: 'fr' | 'en';
@@ -590,10 +591,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ language }) => {
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
                                 <span className="text-sm font-medium text-gray-900">
-                                  {reservation.space_type === 'coworking' ? 'Espace Coworking' :
-                                   reservation.space_type === 'bureau-prive' ? 'Bureau Privé' :
-                                   reservation.space_type === 'domiciliation' ? 'Service Domiciliation' :
-                                   reservation.space_type}
+                                  {getFormattedSpaceText(reservation, 'Espace non spécifié')}
                                 </span>
                                 <span className={`px-2 py-1 text-xs rounded-full ${
                                   reservation.status === 'confirmed' ? 'bg-green-100 text-green-800' :

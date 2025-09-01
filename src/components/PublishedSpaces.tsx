@@ -98,7 +98,7 @@ const PublishedSpaces: React.FC = () => {
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Coworking
+            Espace Coworking
           </button>
           <button
             onClick={() => setSelectedType('bureau-prive')}
@@ -156,7 +156,7 @@ const PublishedSpaces: React.FC = () => {
                     space.type === 'bureau-prive' ? 'bg-green-100 text-green-800' :
                     'bg-purple-100 text-purple-800'
                   }`}>
-                    {space.type === 'coworking' ? 'Coworking' :
+                    {space.type === 'coworking' ? 'Espace Coworking' :
                      space.type === 'bureau-prive' ? 'Bureau Privé' :
                      'Domiciliation'}
                   </span>

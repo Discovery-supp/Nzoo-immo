@@ -149,7 +149,7 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
         availabilityStatus: 'Statut de disponibilité'
       },
       types: {
-        coworking: 'Coworking',
+        coworking: 'Espace Coworking',
         'bureau-prive': 'Bureau Privé',
   
       },
@@ -201,8 +201,8 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
         availabilityStatus: 'Availability status'
       },
       types: {
-        coworking: 'Coworking',
-        'bureau-prive': 'Private Office',
+        coworking: 'Espace Coworking',
+        'bureau-prive': 'Bureau Privé',
 
       },
       status: {

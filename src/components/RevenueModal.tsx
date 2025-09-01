@@ -38,7 +38,7 @@ const RevenueModal: React.FC<RevenueModalProps> = ({ isOpen, onClose, language }
 
   // Services disponibles
   const availableServices = [
-    { id: 'coworking', name: 'Coworking', color: '#3B82F6' },
+    { id: 'coworking', name: 'Espace Coworking', color: '#3B82F6' },
     { id: 'bureau-prive', name: 'Bureau Privé', color: '#10B981' },
 
     { id: 'domiciliation', name: 'Domiciliation', color: '#8B5CF6' }

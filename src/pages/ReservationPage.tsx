@@ -242,14 +242,29 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
       endDate.setMonth(endDate.getMonth() + 1);
       endDate.setDate(endDate.getDate() - 1);
       
+      console.log('📅 Sélection d\'une seule date:', {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        days: calculateDaysBetween(startDate, endDate)
+      });
+      
       setSelectedDates([startDate, endDate]);
       setAutoSelectDates(true);
       await checkAvailability(startDate, endDate);
     } else if (Array.isArray(value) && value.length === 2) {
       // Sélection d'une plage de dates
+      const startDate = value[0];
+      const endDate = value[1];
+      
+      console.log('📅 Sélection d\'une plage de dates:', {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        days: calculateDaysBetween(startDate, endDate)
+      });
+      
       setSelectedDates(value as [Date, Date]);
       setAutoSelectDates(false);
-      await checkAvailability(value[0], value[1]);
+      await checkAvailability(startDate, endDate);
     }
   };
 
@@ -317,7 +332,14 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
     const days = calculateSelectedDays();
     
     if (selectedSpace === 'domiciliation') {
-      return (spaceInfo.monthlyPrice || 0) * Math.ceil(days / 30);
+      // Pour la domiciliation, utiliser l'arrondi au mois le plus proche
+      if (days <= 30) {
+        return spaceInfo.monthlyPrice || 0;
+      } else {
+        // Arrondir au mois le plus proche (pas de décimales)
+        const months = Math.round(days / 30);
+        return (spaceInfo.monthlyPrice || 0) * months;
+      }
     }
     
     if (Array.isArray(selectedDates) && selectedDates.length === 2) {
@@ -678,7 +700,15 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           userAgent: navigator.userAgent,
         });
       } catch {}
-      const mappedSpaceType = mapSpaceType(selectedSpace || 'coworking');
+      // Déterminer le type d'espace basé sur l'activité pour l'offre "Bienvenu à Kin"
+      let finalSpaceType = selectedSpace || 'coworking';
+      if (formData.activity && 
+          formData.activity.toLowerCase().includes('bienvenu') && 
+          formData.activity.toLowerCase().includes('kin')) {
+        finalSpaceType = 'accompagnement_jeunes_entrepreneuriat';
+        console.log('🎯 Offre "Bienvenu à Kin" détectée, espace changé en:', finalSpaceType);
+      }
+      
       const startDateFormatted = selectedDates[0].toISOString().split('T')[0];
       const endDateFormatted = selectedDates[1].toISOString().split('T')[0];
 
@@ -689,7 +719,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         company: formData.company,
         activity: formData.activity,
         address: formData.address,
-        spaceType: mappedSpaceType,
+        spaceType: finalSpaceType,
         startDate: startDateFormatted,
         endDate: endDateFormatted,
         occupants: formData.occupants,
@@ -798,7 +828,15 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
     try {
       console.log('🔍 [DEBUG] Préparation des données de réservation');
-      const mappedSpaceType = mapSpaceType(selectedSpace || 'coworking');
+      // Déterminer le type d'espace basé sur l'activité pour l'offre "Bienvenu à Kin"
+      let finalSpaceType = selectedSpace || 'coworking';
+      if (formData.activity && 
+          formData.activity.toLowerCase().includes('bienvenu') && 
+          formData.activity.toLowerCase().includes('kin')) {
+        finalSpaceType = 'accompagnement_jeunes_entrepreneuriat';
+        console.log('🎯 Offre "Bienvenu à Kin" détectée, espace changé en:', finalSpaceType);
+      }
+      
       const startDateFormatted = selectedDates[0].toISOString().split('T')[0];
       const endDateFormatted = selectedDates[1].toISOString().split('T')[0];
 
@@ -809,7 +847,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         company: formData.company,
         activity: formData.activity,
         address: formData.address,
-        spaceType: mappedSpaceType,
+        spaceType: finalSpaceType,
         startDate: startDateFormatted,
         endDate: endDateFormatted,
         occupants: formData.occupants,

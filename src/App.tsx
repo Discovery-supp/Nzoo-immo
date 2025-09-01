@@ -64,7 +64,12 @@ function App() {
   return (
     <HelmetProvider>
       <ToastProvider position="top-right" maxToasts={5}>
-        <Router>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}
+        >
         <React.Suspense fallback={
           <div className="min-h-screen bg-white flex items-center justify-center">
             <div className="text-center">

@@ -188,7 +188,7 @@ const SpaceManagement: React.FC = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Tous les types</option>
-            <option value="coworking">Coworking</option>
+            <option value="coworking">Espace Coworking</option>
             <option value="bureau-prive">Bureau Privé</option>
 
           </select>
@@ -270,7 +270,7 @@ const SpaceManagement: React.FC = () => {
                       space.type === 'bureau-prive' ? 'bg-green-100 text-green-800' :
                       'bg-purple-100 text-purple-800'
                     }`}>
-                      {space.type === 'coworking' ? 'Coworking' :
+                      {space.type === 'coworking' ? 'Espace Coworking' :
                        space.type === 'bureau-prive' ? 'Bureau Privé' :
                        'Salle de Réunion'}
                     </span>

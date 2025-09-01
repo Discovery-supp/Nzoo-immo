@@ -54,6 +54,7 @@ import AIFollowUpManager from '../components/AIFollowUpManager';
 import { generateAndDownloadInvoice } from '../services/invoiceService';
 import { profileService } from '../services/profileService';
 import { supabase } from '../lib/supabase';
+import { getFormattedSpaceText } from '../utils/spaceDisplayHelper';
 
 interface AdminDashboardProps {
   language: 'fr' | 'en';
@@ -101,6 +102,29 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
+  });
+
+  // États pour la modification des réservations
+  const [isEditReservationModalOpen, setIsEditReservationModalOpen] = useState(false);
+  const [editingReservation, setEditingReservation] = useState<any>(null);
+  const [isSavingReservation, setIsSavingReservation] = useState(false);
+  const [editReservationFormData, setEditReservationFormData] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    company: '',
+    activity: '',
+    address: '',
+    space_type: 'coworking',
+    start_date: '',
+    end_date: '',
+    occupants: 1,
+    subscription_type: 'daily',
+    amount: 0,
+    payment_method: 'cash',
+    status: 'pending',
+    notes: '',
+    admin_notes: ''
   });
 
   // Utiliser le hook pour récupérer les vraies données
@@ -385,9 +409,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
         weekReservations: 'This Week',
         monthReservations: 'This Month',
         averageAmount: 'Average Amount',
-        coworkingRevenue: 'Coworking Revenue',
-        privateOfficeRevenue: 'Private Office Revenue',
-        meetingRoomRevenue: 'Meeting Room Revenue'
+        coworkingRevenue: 'Revenus Coworking',
+        privateOfficeRevenue: 'Revenus Bureau Privé',
+        meetingRoomRevenue: 'Revenus Salle Réunion'
       },
       reservations: {
         pending: 'Pending',
@@ -487,19 +511,35 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       }
 
       // Par type d'espace
-      const spaceType = reservation.space_type;
-      
-      if (spaceType === 'coworking') {
+      const rawSpaceType = reservation.space_type || '';
+      // Normaliser et mapper les variantes courantes (majuscules, espaces, accents)
+      const normalizedSpaceType = (() => {
+        const basic = String(rawSpaceType)
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+          .replace(/_/g, '-')
+          .replace(/\s+/g, '-');
+
+        if (basic.includes('cowork')) return 'coworking';
+        if (basic.includes('bureau') && basic.includes('prive')) return 'bureau-prive';
+        if (basic.includes('salle') && basic.includes('reunion')) return 'salle-reunion';
+        if (basic.includes('domicil')) return 'domiciliation';
+        return basic;
+      })();
+
+      if (normalizedSpaceType === 'coworking') {
         acc.revenueByType.coworking += amount;
-      } else if (spaceType === 'bureau_prive' || spaceType === 'bureau-prive') {
+      } else if (normalizedSpaceType === 'bureau-prive' || normalizedSpaceType === 'bureau_prive') {
         acc.revenueByType['bureau_prive'] += amount;
         acc.revenueByType['bureau-prive'] += amount;
-      } else if (spaceType === 'salle-reunion' || spaceType === 'salle_reunion') {
+      } else if (normalizedSpaceType === 'salle-reunion' || normalizedSpaceType === 'salle_reunion') {
         acc.revenueByType['salle-reunion'] += amount;
-      } else if (spaceType === 'domiciliation') {
+      } else if (normalizedSpaceType === 'domiciliation') {
         acc.revenueByType.domiciliation += amount;
       } else {
-        console.log('⚠️ Type d\'espace non reconnu:', spaceType);
+        console.log('⚠️ Type d\'espace non reconnu:', rawSpaceType);
       }
 
       return acc;
@@ -529,9 +569,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Données pour les graphiques
   const revenueByTypeData = [
-    { name: 'Coworking', value: stats.revenueByType.coworking, color: '#3B82F6' },
+    { name: 'Espace Coworking', value: stats.revenueByType.coworking, color: '#3B82F6' },
     { name: 'Bureau Privé', value: stats.revenueByType['bureau_prive'] + stats.revenueByType['bureau-prive'], color: '#10B981' },
-    { name: 'Salle Réunion', value: stats.revenueByType['salle-reunion'], color: '#F59E0B' }
+    { name: 'Salle de Réunion', value: stats.revenueByType['salle-reunion'], color: '#F59E0B' }
   ].filter(item => item.value > 0); // Ne montrer que les types avec des revenus
 
   // Données pour l'évolution des réservations (derniers 30 jours)
@@ -616,10 +656,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   const getFilteredReservations = () => {
     let filtered = reservations;
 
-    // Pour les clients, s'assurer qu'ils ne voient que leurs propres réservations
+    // Pour les clients, s'assurer qu'ils voient toutes leurs réservations
+    // Le filtrage principal se fait par client_id dans useReservations
+    // Cette vérification est maintenue pour la sécurité supplémentaire
     if (userProfile?.role === 'clients') {
-      filtered = filtered.filter(r => r.email === userProfile.email);
-
+      // Toutes les réservations sont déjà filtrées par client_id dans useReservations
+      // donc on peut les afficher toutes
+      filtered = filtered.filter(r => {
+        // Si la réservation a un client_id, elle appartient au client
+        if (r.client_id) {
+          return true;
+        }
+        // Fallback : vérifier l'email (pour les anciennes réservations)
+        return r.email === userProfile.email;
+      });
+      
+      console.log(`🔍 Client ${userProfile.email}: ${filtered.length} réservations trouvées (toutes liées au compte)`);
     }
 
     // Filtre par statut
@@ -712,11 +764,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     }
   };
 
-  const formatSpaceType = (spaceType: string) => {
+  const formatSpaceType = (spaceType: string, reservation?: any) => {
+    // Si on a une réservation complète, utiliser la logique de l'offre "Bienvenu à Kin"
+    if (reservation) {
+      return getFormattedSpaceText(reservation, 'Espace non spécifié');
+    }
+    
+    // Fallback pour les cas où on n'a que le type d'espace
     const types = {
-      'coworking': 'Coworking',
+      'coworking': 'Espace Coworking',
       'bureau-prive': 'Bureau Privé',
-      'salle-reunion': 'Salle Réunion'
+      'salle-reunion': 'Salle de Réunion'
     };
     return types[spaceType as keyof typeof types] || spaceType;
   };
@@ -741,7 +799,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       'Email': reservation.email,
       'Téléphone': reservation.phone,
       'Entreprise': reservation.company || '',
-      'Type d\'espace': formatSpaceType(reservation.space_type),
+      'Type d\'espace': formatSpaceType(reservation.space_type, reservation),
       'Date de début': new Date(reservation.start_date).toLocaleDateString('fr-FR'),
       'Date de fin': new Date(reservation.end_date).toLocaleDateString('fr-FR'),
       'Occupants': reservation.occupants,
@@ -1136,6 +1194,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           <p className="text-gray-600 text-sm font-poppins mt-1">
             {filteredReservations.length} réservation{filteredReservations.length > 1 ? 's' : ''} trouvée{filteredReservations.length > 1 ? 's' : ''}
           </p>
+          
+
         </div>
         <div className="overflow-x-auto">
           {filteredReservations.length === 0 ? (
@@ -1204,7 +1264,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
                   </td>
                   <td className="px-8 py-6 whitespace-nowrap">
                     <div className="space-y-1">
-                      <div className="text-sm font-semibold text-gray-900 font-montserrat">{formatSpaceType(reservation.space_type)}</div>
+                      <div className="text-sm font-semibold text-gray-900 font-montserrat">{formatSpaceType(reservation.space_type, reservation)}</div>
                       <div className="text-sm text-gray-500 font-poppins">{reservation.occupants} personne{reservation.occupants > 1 ? 's' : ''}</div>
                     </div>
                   </td>
@@ -1240,6 +1300,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
                   </td>
                   <td className="px-8 py-6 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
+                      {/* Bouton Modifier */}
+                      <button
+                        onClick={() => handleEditReservation(reservation)}
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nzoo-dark transition-all duration-300"
+                        title="Modifier la réservation"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </button>
+                      
+                      {/* Bouton Facture */}
                       <button
                         onClick={() => handleDownloadInvoice(reservation)}
                         disabled={downloadingInvoice === reservation.id || reservation.status !== 'confirmed'}
@@ -1510,10 +1581,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
 
   // Fonction pour gérer les changements de formulaire profil
   const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfileFormData({
-      ...profileFormData,
+    setProfileFormData(prev => ({
+      ...prev,
       [e.target.name]: e.target.value
-    });
+    }));
   };
 
   // Fonction pour sauvegarder les modifications du profil
@@ -1640,6 +1711,444 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
+  // Fonctions pour la modification des réservations
+  const handleEditReservation = (reservation: any) => {
+    console.log('🔍 [MODAL] Ouverture du modal de modification pour la réservation:', reservation);
+    
+    setEditingReservation(reservation);
+    setEditReservationFormData({
+      full_name: reservation.full_name || '',
+      email: reservation.email || '',
+      phone: reservation.phone || '',
+      company: reservation.company || '',
+      activity: reservation.activity || '',
+      address: reservation.address || '',
+      space_type: reservation.space_type || 'coworking',
+      start_date: reservation.start_date || '',
+      end_date: reservation.end_date || '',
+      occupants: reservation.occupants || 1,
+      subscription_type: reservation.subscription_type || 'daily',
+      amount: reservation.amount || 0,
+      payment_method: reservation.payment_method || 'cash',
+      status: reservation.status || 'pending',
+      notes: reservation.notes || '',
+      admin_notes: reservation.admin_notes || ''
+    });
+    
+    console.log('🔍 [MODAL] Données du formulaire initialisées:', {
+      full_name: reservation.full_name || '',
+      email: reservation.email || '',
+      activity: reservation.activity || '',
+      space_type: reservation.space_type || 'coworking'
+    });
+    
+    setIsEditReservationModalOpen(true);
+    console.log('🔍 [MODAL] Modal ouvert, isEditReservationModalOpen = true');
+  };
+
+  const handleEditReservationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditReservationFormData(prev => ({
+      ...prev,
+      [name]: name === 'amount' || name === 'occupants' ? Number(value) : value
+    }));
+  };
+
+  const handleSaveReservation = async () => {
+    if (!editingReservation) {
+      console.error('❌ Aucune réservation en cours de modification');
+      showNotification('error', 'Aucune réservation sélectionnée');
+      return;
+    }
+    
+    console.log('🔍 Début de la sauvegarde de la réservation:', {
+      reservationId: editingReservation.id,
+      formData: editReservationFormData
+    });
+    
+    setIsSavingReservation(true);
+    
+    try {
+      // Validation des données avant envoi
+      if (!editReservationFormData.full_name || !editReservationFormData.email) {
+        console.error('❌ Données manquantes:', {
+          full_name: editReservationFormData.full_name,
+          email: editReservationFormData.email
+        });
+        showNotification('error', 'Nom complet et email sont obligatoires');
+        return;
+      }
+      
+      // Préparation des données de mise à jour
+      const updateData = {
+        full_name: editReservationFormData.full_name,
+        email: editReservationFormData.email,
+        phone: editReservationFormData.phone,
+        company: editReservationFormData.company,
+        activity: editReservationFormData.activity,
+        address: editReservationFormData.address,
+        space_type: editReservationFormData.space_type,
+        start_date: editReservationFormData.start_date,
+        end_date: editReservationFormData.end_date,
+        occupants: editReservationFormData.occupants,
+        subscription_type: editReservationFormData.subscription_type,
+        amount: editReservationFormData.amount,
+        payment_method: editReservationFormData.payment_method,
+        status: editReservationFormData.status,
+        notes: editReservationFormData.notes,
+        admin_notes: editReservationFormData.admin_notes,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('📝 Données de mise à jour préparées:', updateData);
+      console.log('🔍 ID de la réservation à mettre à jour:', editingReservation.id);
+      
+      // Tentative de mise à jour
+      const { data: updateResult, error } = await supabase
+        .from('reservations')
+        .update(updateData)
+        .eq('id', editingReservation.id)
+        .select();
+
+      if (error) {
+        console.error('❌ Erreur lors de la mise à jour de la réservation:', error);
+        console.error('🔍 Détails de l\'erreur:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        showNotification('error', `Erreur lors de la mise à jour: ${error.message}`);
+        return;
+      }
+
+      console.log('✅ Mise à jour réussie! Résultat:', updateResult);
+      
+      // Vérification que les données ont bien été mises à jour
+      if (updateResult && updateResult.length > 0) {
+        const updatedReservation = updateResult[0];
+        console.log('📋 Réservation mise à jour:', updatedReservation);
+        
+        // Vérification des champs critiques
+        const criticalFields = ['full_name', 'email', 'phone', 'status'] as const;
+        const verificationResults = criticalFields.map(field => ({
+          field,
+          expected: updateData[field],
+          actual: updatedReservation[field],
+          match: updateData[field] === updatedReservation[field]
+        }));
+        
+        console.log('🔍 Vérification des champs critiques:', verificationResults);
+        
+        const mismatchedFields = verificationResults.filter(r => !r.match);
+        if (mismatchedFields.length > 0) {
+          console.warn('⚠️ Certains champs ne correspondent pas:', mismatchedFields);
+        }
+      }
+
+      showNotification('success', 'Réservation mise à jour avec succès');
+      setIsEditReservationModalOpen(false);
+      setEditingReservation(null);
+      
+      // Recharger les réservations
+      console.log('🔄 Rechargement des réservations...');
+      try {
+        await refetch();
+        console.log('✅ Réservations rechargées avec succès');
+      } catch (refetchError) {
+        console.error('❌ Erreur lors du rechargement:', refetchError);
+        // Continuer même si le rechargement échoue
+      }
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      showNotification('error', `Erreur lors de la sauvegarde: ${errorMessage}`);
+    } finally {
+      setIsSavingReservation(false);
+      console.log('🏁 Sauvegarde terminée');
+    }
+  };
+
+  const handleCancelEditReservation = () => {
+    setIsEditReservationModalOpen(false);
+    setEditingReservation(null);
+    setEditReservationFormData({
+      full_name: '',
+      email: '',
+      phone: '',
+      company: '',
+      activity: '',
+      address: '',
+      space_type: 'coworking',
+      start_date: '',
+      end_date: '',
+      occupants: 1,
+      subscription_type: 'daily',
+      amount: 0,
+      payment_method: 'cash',
+      status: 'pending',
+      notes: '',
+      admin_notes: ''
+    });
+  };
+
+  // Modal de modification des réservations
+  const renderEditReservationModal = () => (
+    <>
+      {isEditReservationModalOpen && editingReservation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Modifier la Réservation</h2>
+              <button
+                onClick={handleCancelEditReservation}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Informations client */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Nom complet *</label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    value={editReservationFormData.full_name}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editReservationFormData.email}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Téléphone *</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={editReservationFormData.phone}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Entreprise</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={editReservationFormData.company}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Activité *</label>
+                  <input
+                    type="text"
+                    name="activity"
+                    value={editReservationFormData.activity}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Adresse</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={editReservationFormData.address}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                  />
+                </div>
+              </div>
+
+              {/* Informations de réservation */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Type d'espace *</label>
+                  <select
+                    name="space_type"
+                    value={editReservationFormData.space_type}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  >
+                    <option value="coworking">Espace Coworking</option>
+                    <option value="bureau-prive">Bureau Privé</option>
+                    <option value="salle-reunion">Salle de Réunion</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Type d'abonnement *</label>
+                  <select
+                    name="subscription_type"
+                    value={editReservationFormData.subscription_type}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  >
+                    <option value="daily">Quotidien</option>
+                    <option value="weekly">Hebdomadaire</option>
+                    <option value="monthly">Mensuel</option>
+                    <option value="yearly">Annuel</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date de début *</label>
+                  <input
+                    type="date"
+                    name="start_date"
+                    value={editReservationFormData.start_date}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date de fin *</label>
+                  <input
+                    type="date"
+                    name="end_date"
+                    value={editReservationFormData.end_date}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre d'occupants *</label>
+                  <input
+                    type="number"
+                    name="occupants"
+                    value={editReservationFormData.occupants}
+                    onChange={handleEditReservationInputChange}
+                    min="1"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Montant *</label>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={editReservationFormData.amount}
+                    onChange={handleEditReservationInputChange}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Méthode de paiement *</label>
+                  <select
+                    name="payment_method"
+                    value={editReservationFormData.payment_method}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  >
+                    <option value="cash">Espèces</option>
+                    <option value="mobile_money">Mobile Money</option>
+                    <option value="bank_transfer">Virement bancaire</option>
+                    <option value="card">Carte bancaire</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Statut *</label>
+                  <select
+                    name="status"
+                    value={editReservationFormData.status}
+                    onChange={handleEditReservationInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    required
+                  >
+                    <option value="pending">En attente</option>
+                    <option value="confirmed">Confirmée</option>
+                    <option value="completed">Terminée</option>
+                    <option value="cancelled">Annulée</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Notes client</label>
+                  <textarea
+                    name="notes"
+                    value={editReservationFormData.notes}
+                    onChange={handleEditReservationInputChange}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    placeholder="Notes du client..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Notes administrateur</label>
+                  <textarea
+                    name="admin_notes"
+                    value={editReservationFormData.admin_notes}
+                    onChange={handleEditReservationInputChange}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nzoo-dark focus:border-nzoo-dark"
+                    placeholder="Notes administratives..."
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  onClick={handleCancelEditReservation}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveReservation}
+                  disabled={isSavingReservation}
+                  className="px-6 py-3 bg-nzoo-dark text-white rounded-lg hover:bg-nzoo-dark/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                >
+                  {isSavingReservation ? (
+                    <>
+                      <div className="rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Sauvegarde...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Sauvegarder</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 
   const renderProfileModal = () => (
     <>
@@ -2374,7 +2883,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           />
           
           {/* Modal de profil */}
-          {renderProfileModal()}
+                      {renderProfileModal()}
+            {renderEditReservationModal()}
           
           {/* Notifications */}
           {notification && (

@@ -166,8 +166,16 @@ export const calculateTotalPrice = (
       total = (prices.daily || 0) * days;
       break;
     case 'monthly':
-      const months = Math.ceil(days / 30);
-      total = (prices.monthly || 0) * months;
+      // Pour les abonnements mensuels, utiliser l'arrondi au mois le plus proche
+      // Si c'est 30 jours ou moins, c'est 1 mois
+      // Si c'est plus de 30 jours, arrondir au mois le plus proche
+      if (days <= 30) {
+        total = prices.monthly || 0;
+      } else {
+        // Arrondir au mois le plus proche (pas de décimales)
+        const months = Math.round(days / 30);
+        total = (prices.monthly || 0) * months;
+      }
       break;
     case 'yearly':
       const years = Math.ceil(days / 365);

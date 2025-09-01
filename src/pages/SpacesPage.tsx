@@ -142,7 +142,7 @@ const SpacesPage: React.FC<SpacesPageProps> = ({ language }) => {
   // Fonction pour obtenir le type d'espace affiché
   const getSpaceType = (spaceKey: string) => {
     const typeMap: Record<string, string> = {
-      coworking: 'Coworking',
+      coworking: 'Espace Coworking',
       'bureau-prive': 'Bureau Privé',
       'domiciliation': 'Domiciliation'
     };
