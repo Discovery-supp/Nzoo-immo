@@ -50,6 +50,7 @@ import RevenueModal from '../components/RevenueModal';
 import PermissionGuard from '../components/PermissionGuard';
 import NotificationStats from '../components/NotificationStats';
 import AIFollowUpManager from '../components/AIFollowUpManager';
+import AvailabilityCalendar from '../components/AvailabilityCalendar';
 
 import { generateAndDownloadInvoice } from '../services/invoiceService';
 import { profileService } from '../services/profileService';
@@ -2600,9 +2601,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   );
 
   const tabs = [
-    // Pour les clients : seulement Réservations et Mon Profil
+    // Pour les clients : Réservations, Disponibilité et Mon Profil
     ...(userProfile?.role === 'clients' ? [
       { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
+      { id: 'availability', label: 'Disponibilité', icon: Clock },
       { id: 'profile', label: 'Mon Profil', icon: User }
     ] : [
       // Pour les administrateurs et autres rôles : tous les onglets
@@ -2610,6 +2612,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
       { id: 'reservationManagement', label: t.tabs.reservationManagement, icon: Calendar },
       { id: 'spaces', label: 'Espaces', icon: Building },
+      { id: 'availability', label: 'Disponibilité', icon: Clock },
       { id: 'revenue', label: t.tabs.revenue, icon: DollarSign },
       { id: 'statistics', label: t.tabs.statistics, icon: TrendingUp },
       { id: 'aiFollowUps', label: 'Relances IA', icon: Brain },
@@ -2766,6 +2769,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           {activeTab === 'reservations' && renderReservations()}
           {activeTab === 'reservationManagement' && (console.log('AUDIT_PAGE_VIEW','reservationManagement'), <ReservationManagement language={language} />)}
           {activeTab === 'spaces' && (console.log('AUDIT_PAGE_VIEW','spaces'), <SpaceManagementForm language={language} />)}
+          {activeTab === 'availability' && (
+            <div className="space-y-6">
+              <AvailabilityCalendar language={language} userRole={userProfile?.role as 'admin' | 'client'} />
+            </div>
+          )}
           {activeTab === 'revenue' && (console.log('AUDIT_PAGE_VIEW','revenue'), renderRevenue())}
           {activeTab === 'audit' && (
             userProfile?.role === 'admin' ? (
