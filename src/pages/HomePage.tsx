@@ -913,7 +913,7 @@ const HomePage: React.FC = () => {
                     <div className="flex items-center space-x-4">
                       <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
                         <img
-                          src="/domiciliation.jpg"
+                          src="/domiciliation_web.jpeg"
                           alt="Domiciliation"
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"

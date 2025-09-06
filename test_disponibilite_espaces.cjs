@@ -36,7 +36,7 @@ const testSpaces = {
     yearlyPrice: 1600,
     hourlyPrice: 0,
     maxOccupants: 1,
-    imageUrl: '/images/spaces/domiciliation.jpg',
+    imageUrl: '/domiciliation_web.jpeg',
     isAvailable: true
   }
 };

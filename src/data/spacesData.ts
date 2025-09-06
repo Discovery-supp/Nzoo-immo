@@ -128,7 +128,7 @@ const defaultSpaces: Record<string, Record<'fr' | 'en', SpaceInfo>> = {
       yearlyPrice: 1600,
       hourlyPrice: 0,
       maxOccupants: 1,
-      imageUrl: '/domiciliation.jpg',
+      imageUrl: '/domiciliation_web.jpeg',
       isAvailable: true,
 
     },
@@ -150,7 +150,7 @@ const defaultSpaces: Record<string, Record<'fr' | 'en', SpaceInfo>> = {
       yearlyPrice: 1600,
       hourlyPrice: 0,
       maxOccupants: 1,
-      imageUrl: '/domiciliation.jpg',
+      imageUrl: '/domiciliation_web.jpeg',
       isAvailable: true,
 
     }
