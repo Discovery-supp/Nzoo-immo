@@ -256,7 +256,7 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
 
   const translations = {
     fr: {
-      title: 'Éditer le Contenu des Espaces',
+      title: 'Modifier le Contenu des Espaces',
       subtitle: 'Modifiez les images, descriptions et prix des espaces',
       edit: 'Modifier',
       save: 'Sauvegarder',

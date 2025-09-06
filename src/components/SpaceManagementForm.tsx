@@ -424,7 +424,7 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
             className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             <FileText className="w-4 h-4" />
-            Éditer le contenu
+            Modifier le contenu
           </button>
           <button
             onClick={() => setShowAddModal(true)}
