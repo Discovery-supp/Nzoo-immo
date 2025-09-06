@@ -148,7 +148,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     }
     
     // Pour les clients, s'assurer qu'ils sont sur un onglet autorisé
-    if (userProfile?.role === 'clients' && !['reservations', 'profile'].includes(activeTab)) {
+    if (userProfile?.role === 'clients' && !['reservations', 'availability', 'profile'].includes(activeTab)) {
 
       setActiveTab('reservations');
     }

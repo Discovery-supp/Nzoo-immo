@@ -112,7 +112,16 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ language, u
       setError(null);
 
       const data = await checkAllSpacesAvailability();
-      setAvailabilityData(data);
+      // Convertir l'objet en tableau
+      const availabilityArray = Object.values(data).map(item => ({
+        spaceType: item.spaceType,
+        isAvailable: item.isAvailable,
+        currentOccupancy: item.currentOccupancy,
+        maxCapacity: item.maxCapacity,
+        availableSlots: item.availableSlots,
+        message: item.message
+      }));
+      setAvailabilityData(availabilityArray);
     } catch (err) {
       console.error('Error loading availability:', err);
       setError(t.error);
@@ -144,7 +153,23 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ language, u
 
   // Charger les données au montage du composant
   useEffect(() => {
-    loadGeneralAvailability();
+    let isMounted = true;
+    
+    const loadData = async () => {
+      try {
+        await loadGeneralAvailability();
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error in useEffect:', error);
+        }
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Vérifier la disponibilité quand les paramètres changent
