@@ -50,7 +50,7 @@ import RevenueModal from '../components/RevenueModal';
 import PermissionGuard from '../components/PermissionGuard';
 import NotificationStats from '../components/NotificationStats';
 import AIFollowUpManager from '../components/AIFollowUpManager';
-import AvailabilityCalendar from '../components/AvailabilityCalendar';
+import CoworkingCalendar from '../components/CoworkingCalendar';
 
 import { generateAndDownloadInvoice } from '../services/invoiceService';
 import { profileService } from '../services/profileService';
@@ -2771,7 +2771,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           {activeTab === 'spaces' && (console.log('AUDIT_PAGE_VIEW','spaces'), <SpaceManagementForm language={language} />)}
           {activeTab === 'availability' && (
             <div className="space-y-6">
-              <AvailabilityCalendar language={language} userRole={userProfile?.role as 'admin' | 'client'} />
+              <CoworkingCalendar language={language} userRole={userProfile?.role as 'admin' | 'client'} />
             </div>
           )}
           {activeTab === 'revenue' && (console.log('AUDIT_PAGE_VIEW','revenue'), renderRevenue())}
