@@ -1458,34 +1458,39 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
             </div>
           )}
 
-          {/* Messages informatifs selon la méthode sélectionnée */}
-          {selectedPaymentMethod && (
-            <div className="mb-8 p-6 rounded-2xl border-2 backdrop-blur-sm">
-              {selectedPaymentMethod === 'visa' && (
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <CreditCard className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <p className="text-blue-700 text-center font-medium">
-                    {language === 'fr'
-                      ? "Vous avez choisi le paiement par carte VISA. Vous serez redirigé vers une page de paiement sécurisée."
-                      : "You have chosen VISA card payment. You will be redirected to a secure payment page."}
-                  </p>
+          {/* Message informatif sur les méthodes de paiement */}
+          <div className="mb-8 p-6 rounded-2xl border-2 border-green-200 bg-green-50 backdrop-blur-sm">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Banknote className="w-6 h-6 text-green-600" />
+              </div>
+              <h4 className="text-green-800 text-lg font-semibold mb-2">
+                {language === 'fr' ? 'Méthodes de paiement disponibles' : 'Available payment methods'}
+              </h4>
+              <p className="text-green-700 text-center font-medium">
+                {language === 'fr'
+                  ? "Actuellement, seul le paiement en espèces est disponible. Les paiements par carte VISA et Mobile Money seront bientôt intégrés. Merci de régler votre réservation sur place lors de votre arrivée."
+                  : "Currently, only cash payment is available. VISA card and Mobile Money payments will be integrated soon. Please pay for your reservation on-site upon arrival."}
+              </p>
+            </div>
+          </div>
+
+          {/* Message informatif pour le paiement en espèces */}
+          {selectedPaymentMethod === 'CASH' && (
+            <div className="mb-8 p-6 rounded-2xl border-2 border-green-200 bg-green-50 backdrop-blur-sm">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Banknote className="w-6 h-6 text-green-600" />
                 </div>
-              )}
-              
-              {selectedPaymentMethod === 'CASH' && (
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Banknote className="w-6 h-6 text-green-600" />
-                  </div>
-                  <p className="text-green-700 text-center font-medium">
-                    {language === 'fr'
-                      ? "Vous avez choisi de payer en espèces. Merci de régler sur place lors de votre arrivée."
-                      : "You have chosen to pay cash. Please pay on-site upon arrival."}
-                  </p>
-                </div>
-              )}
+                <h4 className="text-green-800 text-lg font-semibold mb-2">
+                  {language === 'fr' ? 'Paiement en espèces sélectionné' : 'Cash payment selected'}
+                </h4>
+                <p className="text-green-700 text-center font-medium">
+                  {language === 'fr'
+                    ? "Vous avez choisi de payer en espèces. Merci de régler le montant total sur place lors de votre arrivée. Votre réservation sera confirmée immédiatement."
+                    : "You have chosen to pay cash. Please pay the total amount on-site upon arrival. Your reservation will be confirmed immediately."}
+                </p>
+              </div>
             </div>
           )}
 
@@ -1857,10 +1862,10 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                           </div>
                         </div>
                         <p className="text-white/90 text-sm font-semibold font-poppins">
-                          {language === 'fr' ? 'Méthodes de paiement multiples' : 'Multiple payment methods'}
+                          {language === 'fr' ? 'Paiement en espèces' : 'Cash payment'}
                         </p>
                         <p className="text-white/70 text-xs mt-1 font-body">
-                          {language === 'fr' ? 'Orange Money • Airtel Money • VISA • Espèces' : 'Orange Money • Airtel Money • VISA • Cash'}
+                          {language === 'fr' ? 'Espèces uniquement (VISA et Mobile Money bientôt disponibles)' : 'Cash only (VISA and Mobile Money coming soon)'}
                         </p>
                       </div>
                     </div>

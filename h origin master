@@ -1,0 +1,5 @@
+[33m4d46a20[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m feat: Amélioration complète du système de réservation et de disponibilité - Correction du modal de modification des réservations - Gestion conditionnelle de la disponibilité des espaces (Coworking/Bureau privé uniquement) - Restauration du logo original N'zoo Immo - Correction des styles du calendrier (couleurs jaune/bleu foncé) - Amélioration de la logique de validation des étapes - Traduction des éléments UI en français - Correction des erreurs de console et warnings
+[33mb777384[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: Traductions françaises complètes et optimisations console - Interface 100% française, normalisation des types d'espaces, future flags React Router, guides de développement
+[33me16366d[m  Suppression zone diagnostique dashboard + Système emails complet + Gestion comptes clients
+[33m7aa050a[m  Récupération automatique des informations utilisateur dans la réservation
+[33m9150cca[m  Amélioration de la gestion des périodes de réservation
