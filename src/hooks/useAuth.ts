@@ -40,7 +40,9 @@ export const useAuth = () => {
   // Fonction pour nettoyer une session
   const clearSession = (storageKey: string) => {
     sessionStorage.removeItem(storageKey);
-    console.log(`🔒 Session nettoyée: ${storageKey}`);
+    if (import.meta.env.DEV) {
+      console.log(`🔒 Session nettoyée: ${storageKey}`);
+    }
   };
 
   // Fonction pour créer une nouvelle session
@@ -134,7 +136,9 @@ export const useAuth = () => {
     if (sessionData) {
       setUser(sessionData.user);
       setIsAuthenticated(true);
-      console.log(`🔐 Session locale active pour ${sessionData.user.username}`);
+      if (import.meta.env.DEV) {
+        console.log(`🔐 Session locale active pour ${sessionData.user.username}`);
+      }
       return;
     }
 
@@ -144,7 +148,9 @@ export const useAuth = () => {
     if (supabaseUser) {
       setUser(supabaseUser);
       setIsAuthenticated(true);
-      console.log(`🔐 Session Supabase active pour ${supabaseUser.username}`);
+      if (import.meta.env.DEV) {
+        console.log(`🔐 Session Supabase active pour ${supabaseUser.username}`);
+      }
       
       // Sauvegarder la session locale
       const sessionData = createSession(supabaseUser, 'client');
@@ -155,7 +161,9 @@ export const useAuth = () => {
     // Aucune session trouvée
     setUser(null);
     setIsAuthenticated(false);
-    console.log('❌ Aucune session trouvée');
+    if (import.meta.env.DEV) {
+      console.log('❌ Aucune session trouvée');
+    }
   };
 
   useEffect(() => {
@@ -178,7 +186,9 @@ export const useAuth = () => {
 
     // Écouter les changements d'authentification Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Changement d\'état d\'authentification Supabase:', event);
+      if (import.meta.env.DEV) {
+        console.log('🔄 Changement d\'état d\'authentification Supabase:', event);
+      }
       
       if (event === 'SIGNED_IN' && session) {
         await checkAuth();
@@ -205,7 +215,9 @@ export const useAuth = () => {
     setUser(userData);
     setIsAuthenticated(true);
     
-    console.log(`✅ Connexion réussie pour ${userData.username}`);
+    if (import.meta.env.DEV) {
+      console.log(`✅ Connexion réussie pour ${userData.username}`);
+    }
     try {
       AuditService.record({
         actorId: userData.id,
@@ -240,7 +252,9 @@ export const useAuth = () => {
     setUser(null);
     setIsAuthenticated(false);
     
-    console.log('🚪 Déconnexion effectuée');
+    if (import.meta.env.DEV) {
+      console.log('🚪 Déconnexion effectuée');
+    }
     try {
       AuditService.record({
         actorId: user?.id || 'unknown',

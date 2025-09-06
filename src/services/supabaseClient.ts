@@ -3,16 +3,21 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('🔍 Supabase configuration check:');
-console.log('URL:', supabaseUrl ? 'Set' : 'Missing');
-console.log('Key:', supabaseAnonKey ? 'Set' : 'Missing');
+// Vérifier la configuration Supabase (logs de développement uniquement)
+if (import.meta.env.DEV) {
+  console.log('🔍 Supabase configuration check:');
+  console.log('URL:', supabaseUrl ? 'Set' : 'Missing');
+  console.log('Key:', supabaseAnonKey ? 'Set' : 'Missing');
+}
 
 // Vérifier si les variables d'environnement sont définies
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('⚠️ Variables d\'environnement Supabase manquantes');
-  console.warn('Veuillez créer un fichier .env.local avec:');
-  console.warn('VITE_SUPABASE_URL=votre_url_supabase');
-  console.warn('VITE_SUPABASE_ANON_KEY=votre_clé_anon');
+  if (import.meta.env.DEV) {
+    console.warn('⚠️ Variables d\'environnement Supabase manquantes');
+    console.warn('Veuillez créer un fichier .env.local avec:');
+    console.warn('VITE_SUPABASE_URL=votre_url_supabase');
+    console.warn('VITE_SUPABASE_ANON_KEY=votre_clé_anon');
+  }
 }
 
 // Créer le client Supabase avec fallback
@@ -38,7 +43,9 @@ export const supabase = createClient(
 // Fonction de test de connexion améliorée
 export const testSupabaseConnection = async () => {
   try {
-    console.log('🔍 Testing Supabase connection...');
+    if (import.meta.env.DEV) {
+      console.log('🔍 Testing Supabase connection...');
+    }
     
     const { data, error } = await supabase
       .from('reservations')
@@ -46,30 +53,38 @@ export const testSupabaseConnection = async () => {
       .limit(1);
     
     if (error) {
-      console.error('❌ Supabase connection failed:', error.message);
-      
-      // Diagnostic des erreurs courantes
-      if (error.message.includes('Invalid API key')) {
-        console.error('🔧 Solution: Vérifiez votre clé API Supabase');
-      } else if (error.message.includes('fetch')) {
-        console.error('🔧 Solution: Vérifiez votre connexion internet');
-      } else if (error.message.includes('relation "reservations" does not exist')) {
-        console.error('🔧 Solution: La table reservations n\'existe pas, exécutez les migrations');
+      if (import.meta.env.DEV) {
+        console.error('❌ Supabase connection failed:', error.message);
+        
+        // Diagnostic des erreurs courantes
+        if (error.message.includes('Invalid API key')) {
+          console.error('🔧 Solution: Vérifiez votre clé API Supabase');
+        } else if (error.message.includes('fetch')) {
+          console.error('🔧 Solution: Vérifiez votre connexion internet');
+        } else if (error.message.includes('relation "reservations" does not exist')) {
+          console.error('🔧 Solution: La table reservations n\'existe pas, exécutez les migrations');
+        }
       }
       
       return { success: false, error: error.message };
     } else {
-      console.log('✅ Supabase connected successfully');
+      if (import.meta.env.DEV) {
+        console.log('✅ Supabase connected successfully');
+      }
       return { success: true };
     }
   } catch (err) {
-    console.error('❌ Unexpected error testing Supabase:', err);
+    if (import.meta.env.DEV) {
+      console.error('❌ Unexpected error testing Supabase:', err);
+    }
     return { success: false, error: err instanceof Error ? err.message : 'Erreur inconnue' };
   }
 };
 
-// Test de connexion au démarrage
-testSupabaseConnection();
+// Test de connexion au démarrage (uniquement en développement)
+if (import.meta.env.DEV) {
+  testSupabaseConnection();
+}
 
 // Export types
 export type { Database } from './database.types';
