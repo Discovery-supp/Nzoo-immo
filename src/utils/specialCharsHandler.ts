@@ -94,10 +94,10 @@ export const SPECIAL_CHARS: SpecialChar[] = [
   { symbol: '▫', name: 'White square', description: 'Carré blanc', category: 'symbol' },
 
   // Guillemets
-  { symbol: '"', name: 'Guillemets droits', description: 'Guillemets droits', category: 'quotes' },
-  { symbol: '"', name: 'Guillemets courbes', description: 'Guillemets courbes', category: 'quotes' },
-  { symbol: ''', name: 'Apostrophe courbe', description: 'Apostrophe courbe', category: 'quotes' },
-  { symbol: ''', name: 'Apostrophe droite', description: 'Apostrophe droite', category: 'quotes' },
+  { symbol: '\u0022', name: 'Guillemets droits', description: 'Guillemets droits', category: 'quotes' },
+  { symbol: '\u201C', name: 'Guillemets courbes', description: 'Guillemets courbes', category: 'quotes' },
+  { symbol: '\u2019', name: 'Apostrophe courbe', description: 'Apostrophe courbe', category: 'quotes' },
+  { symbol: '\u0027', name: 'Apostrophe droite', description: 'Apostrophe droite', category: 'quotes' },
   { symbol: '«', name: 'Guillemets français', description: 'Guillemets français ouvrants', category: 'quotes' },
   { symbol: '»', name: 'Guillemets français', description: 'Guillemets français fermants', category: 'quotes' },
   { symbol: '‹', name: 'Guillemets simples', description: 'Guillemets simples ouvrants', category: 'quotes' },

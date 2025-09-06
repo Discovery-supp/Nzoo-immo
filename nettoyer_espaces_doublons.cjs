@@ -71,7 +71,7 @@ const espacesCorrects = {
     yearly_price: 1600,
     hourly_price: 0,
     max_occupants: 1,
-    image_url: '/images/spaces/domiciliation.jpg',
+    image_url: '/domiciliation.jpg',
     is_available: true
   }
 };
