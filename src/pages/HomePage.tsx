@@ -451,8 +451,8 @@ const HomePage: React.FC = () => {
               >
                 <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                   <img
-                    src="/WhatsApp Image 2025-07-11 à 10.17.27_3a034c36.jpg"
-                    alt="N'zoo Immo - Espaces de travail modernes"
+                    src="/Photo_ensemble.jpeg"
+                    alt="N'zoo Immo - Équipe et espaces de travail modernes"
                     className="w-full h-64 sm:h-80 lg:h-96 object-cover"
                     loading="lazy"
                     decoding="async"
