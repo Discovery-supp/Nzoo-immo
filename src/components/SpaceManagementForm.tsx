@@ -136,7 +136,7 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
         name: 'Nom de l\'espace',
         type: 'Type d\'espace',
         description: 'Description',
-        features: 'Ã‰quipements',
+        features: 'Équipements',
         maxOccupants: 'Nombre maximum d\'occupants',
         dailyPrice: 'Prix journalier ($)',
         monthlyPrice: 'Prix mensuel ($)',
@@ -172,9 +172,9 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
         loading: 'Chargement...',
         error: 'Erreur: ',
         success: 'Opération réussie',
-        confirmDelete: 'ÃŠtes-vous sûr de vouloir supprimer cet espace ?',
+        confirmDelete: 'Êtes-vous sûr de vouloir supprimer cet espace ?',
         spaceCreated: 'Espace créé avec succès',
-        spaceUpdated: 'Espace mis Ã  jour avec succès',
+        spaceUpdated: 'Espace mis à jour avec succès',
         spaceDeleted: 'Espace supprimé avec succès',
         saveError: 'Erreur lors de la sauvegarde',
         deleteError: 'Erreur lors de la suppression'
@@ -387,7 +387,7 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
         <SupabaseDiagnostic onRetry={() => window.location.reload()} />
         
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          <p className="font-medium">Erreur de connexion Ã  la base de données</p>
+          <p className="font-medium">Erreur de connexion à la base de données</p>
           <p className="text-sm mt-1">{error}</p>
           <p className="text-sm mt-2">Utilisez le diagnostic ci-dessus pour résoudre le problème de connexion.</p>
         </div>
@@ -424,7 +424,7 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
             className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             <FileText className="w-4 h-4" />
-            Ã‰diter le contenu
+            Éditer le contenu
           </button>
           <button
             onClick={() => setShowAddModal(true)}
@@ -469,20 +469,20 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
           language={language}
           onClose={() => setShowContentEditor(false)}
           onSave={(updatedData) => {
-            console.log('âœ… Données mises Ã  jour:', updatedData);
+            console.log('✅ Données mises à jour:', updatedData);
             
             // Afficher une notification de succès
             setNotification({
               type: 'success',
-              message: 'Contenu des espaces mis Ã  jour avec succès ! Les modifications sont maintenant visibles sur la page des espaces.'
+              message: 'Contenu des espaces mis à jour avec succès ! Les modifications sont maintenant visibles sur la page des espaces.'
             });
 
             // Fermer le modal
             setShowContentEditor(false);
 
-            // Forcer la mise Ã  jour de la page des espaces si elle est ouverte
+            // Forcer la mise à jour de la page des espaces si elle est ouverte
             if (typeof window !== 'undefined') {
-              // Ã‰mettre un événement personnalisé pour notifier les autres composants
+              // Émettre un événement personnalisé pour notifier les autres composants
               window.dispatchEvent(new CustomEvent('spaceContentUpdated', {
                 detail: { updatedData, language }
               }));
