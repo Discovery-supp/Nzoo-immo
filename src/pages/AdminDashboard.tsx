@@ -148,8 +148,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
     }
     
     // Pour les clients, s'assurer qu'ils sont sur un onglet autorisé
-    if (userProfile?.role === 'clients' && !['reservations', 'availability', 'profile'].includes(activeTab)) {
-
+    if (userProfile?.role === 'clients' && !['reservations', 'profile'].includes(activeTab)) {
       setActiveTab('reservations');
     }
   }, [activeTab, userProfile?.role]);
@@ -2601,10 +2600,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
   );
 
   const tabs = [
-    // Pour les clients : Réservations, Disponibilité et Mon Profil
+    // Pour les clients : Réservations et Mon Profil uniquement
     ...(userProfile?.role === 'clients' ? [
       { id: 'reservations', label: t.tabs.reservations, icon: Calendar },
-      { id: 'availability', label: 'Disponibilité', icon: Clock },
       { id: 'profile', label: 'Mon Profil', icon: User }
     ] : [
       // Pour les administrateurs et autres rôles : tous les onglets

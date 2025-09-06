@@ -4,6 +4,7 @@ import { getAllSpaces, getDefaultSpaces } from '../data/spacesData';
 import { SpaceContentService } from '../services/spaceContentService';
 import { ImageUploadService } from '../services/imageUploadService';
 import { useToastContext } from './ToastProvider';
+import EnhancedTextInput from './EnhancedTextInput';
 
 interface SpaceContentEditorProps {
   language: 'fr' | 'en';
@@ -176,7 +177,7 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
   };
 
   const addFeature = (spaceKey: string) => {
-    const newFeature = prompt('Ajouter un nouvel équipement:');
+    const newFeature = prompt(language === 'fr' ? 'Ajouter un nouvel équipement:' : 'Add new equipment:');
     if (newFeature && newFeature.trim()) {
       updateSpaceField(spaceKey, 'features', [
         ...spaceData[spaceKey].features,
@@ -488,27 +489,28 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
 
                   {/* Title */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      {t.titleLabel}
-                    </label>
-                    <input
-                      type="text"
+                    <EnhancedTextInput
                       value={space.title}
-                      onChange={(e) => updateSpaceField(spaceKey, 'title', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                      onChange={(value) => updateSpaceField(spaceKey, 'title', value)}
+                      label={t.titleLabel}
+                      language={language}
+                      showSpecialChars={true}
+                      multiline={false}
+                      className="w-full"
                     />
                   </div>
 
                   {/* Description */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      {t.descriptionLabel}
-                    </label>
-                    <textarea
+                    <EnhancedTextInput
                       value={space.description}
-                      onChange={(e) => updateSpaceField(spaceKey, 'description', e.target.value)}
+                      onChange={(value) => updateSpaceField(spaceKey, 'description', value)}
+                      label={t.descriptionLabel}
+                      language={language}
+                      showSpecialChars={true}
+                      multiline={true}
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base leading-relaxed"
+                      className="w-full"
                     />
                   </div>
 
@@ -529,16 +531,20 @@ const SpaceContentEditor: React.FC<SpaceContentEditorProps> = ({ language, onClo
                     <div className="space-y-3">
                       {space.features.map((feature, index) => (
                         <div key={index} className="flex items-center gap-3">
-                          <input
-                            type="text"
-                            value={feature}
-                            onChange={(e) => {
-                              const updatedFeatures = [...space.features];
-                              updatedFeatures[index] = e.target.value;
-                              updateSpaceField(spaceKey, 'features', updatedFeatures);
-                            }}
-                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
-                          />
+                          <div className="flex-1">
+                            <EnhancedTextInput
+                              value={feature}
+                              onChange={(value) => {
+                                const updatedFeatures = [...space.features];
+                                updatedFeatures[index] = value;
+                                updateSpaceField(spaceKey, 'features', updatedFeatures);
+                              }}
+                              language={language}
+                              showSpecialChars={true}
+                              multiline={false}
+                              className="w-full"
+                            />
+                          </div>
                           <button
                             onClick={() => removeFeature(spaceKey, index)}
                             className="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
