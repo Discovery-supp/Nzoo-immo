@@ -1,6 +1,11 @@
 import { type Reservation } from '../types';
 import { validateAndFormatInvoiceDates, generateInvoiceNumber } from '../utils/dateUtils';
 import { logger } from '../utils/logger';
+import { getFormattedSpaceText } from '../utils/spaceDisplayHelper';
+
+// Logo inline pour éviter les erreurs de chemin lors de l'ouverture locale du fichier HTML
+const LOGO_SVG = `<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 96.992"><g><g><path fill="#183154" d="M82.579,82.263H42.793c-1.523,0-2.758-1.235-2.758-2.758s1.235-2.758,2.758-2.758H79.82V30.061 c0-1.523,1.235-2.758,2.758-2.758s2.758,1.235,2.758,2.758v49.444C85.337,81.028,84.102,82.263,82.579,82.263z"/><path fill="#183154" d="M96.623,32.052c-0.46,0-0.926-0.115-1.355-0.358L49.692,5.927L4.116,31.695 c-1.326,0.75-3.009,0.283-3.758-1.043c-0.75-1.326-0.283-3.009,1.043-3.758L48.335,0.357c0.842-0.476,1.873-0.476,2.715,0 l46.934,26.536c1.326,0.75,1.793,2.432,1.043,3.758C98.52,31.548,97.585,32.052,96.623,32.052z"/><path fill="#183154" d="M16.806,54.024c-1.523,0-2.758-1.235-2.758-2.758V30.061c0-1.523,1.235-2.758,2.758-2.758 s2.758,1.235,2.758,2.758v21.206C19.564,52.789,18.329,54.024,16.806,54.024z"/><path fill="#183154" d="M34.207,82.263H16.806c-1.523,0-2.758-1.235-2.758-2.758V59.804c0-1.523,1.235-2.758,2.758-2.758 h14.643V30.061c0-0.973,0.513-1.874,1.349-2.371l15.485-9.199c0.858-0.51,1.923-0.516,2.787-0.018l15.945,9.199 c0.854,0.493,1.38,1.403,1.38,2.389v29.743c0,1.523-1.235,2.758-2.758,2.758H36.965v16.943 C36.965,81.028,35.731,82.263,34.207,82.263z M19.564,76.747h11.885V62.562H19.564V76.747z M36.965,57.046h25.914V31.654 l-13.167-7.596L36.965,31.63V57.046z"/></g><g><path fill="#183154" d="M119.288,64.201h-3.974L103.358,46.04v18.161h-3.974V39.627h3.974l11.956,18.231V39.627h3.974 V64.201z"/><path fill="#183154" d="M127.166,39.661c0,1.394-0.331,2.464-0.993,3.207c-0.662,0.744-1.633,1.116-2.911,1.116v-1.673 c0.581,0,1.011-0.168,1.29-0.506c0.279-0.336,0.418-0.842,0.418-1.516v-0.732h-1.882v-3.381h3.59 C127.003,37.268,127.166,38.43,127.166,39.661z"/><path fill="#183154" d="M134.451,60.959h11.957v3.242h-16.383v-3.102l11.712-18.265h-11.468v-3.242h15.964v3.102 L134.451,60.959z"/><path fill="#183154" d="M167.861,40.882c1.847,1.069,3.299,2.562,4.357,4.479c1.057,1.917,1.586,4.084,1.586,6.501 c0,2.417-0.529,4.584-1.586,6.501c-1.058,1.917-2.51,3.416-4.357,4.497c-1.848,1.08-3.91,1.621-6.187,1.621 c-2.301,0-4.375-0.54-6.222-1.621c-1.848-1.081-3.306-2.58-4.375-4.497c-1.069-1.917-1.603-4.084-1.603-6.501 c0-2.417,0.534-4.584,1.603-6.501c1.069-1.917,2.527-3.41,4.375-4.479c1.847-1.069,3.921-1.603,6.222-1.603 C163.951,39.278,166.014,39.813,167.861,40.882z M157.456,44.053c-1.232,0.721-2.191,1.755-2.876,3.102 c-0.686,1.348-1.028,2.917-1.028,4.706c0,1.79,0.343,3.358,1.028,4.706c0.685,1.348,1.644,2.382,2.876,3.103 c1.231,0.72,2.637,1.08,4.218,1.08c1.557,0,2.945-0.36,4.165-1.08s2.173-1.755,2.858-3.103c0.685-1.347,1.028-2.916,1.028-4.706 c0-1.789-0.343-3.358-1.028-4.706c-0.686-1.347-1.638-2.382-2.858-3.102c-1.22-0.72-2.609-1.08-4.165-1.08 C160.093,42.973,158.688,43.333,157.456,44.053z"/><path fill="#183154" d="M194.057,40.882c1.847,1.069,3.299,2.562,4.357,4.479c1.057,1.917,1.586,4.084,1.586,6.501 c0,2.417-0.529,4.584-1.586,6.501c-1.058,1.917-2.51,3.416-4.357,4.497c-1.848,1.08-3.91,1.621-6.187,1.621 c-2.301,0-4.375-0.54-6.222-1.621c-1.848-1.081-3.306-2.58-4.375-4.497c-1.069-1.917-1.603-4.084-1.603-6.501 c0-2.417,0.534-4.584,1.603-6.501c1.069-1.917,2.527-3.41,4.375-4.479c1.847-1.069,3.921-1.603,6.222-1.603 C190.147,39.278,192.209,39.813,194.057,40.882z M183.652,44.053c-1.232,0.721-2.191,1.755-2.876,3.102 c-0.686,1.348-1.028,2.917-1.028,4.706c0,1.79,0.343,3.358,1.028,4.706c0.685,1.348,1.644,2.382,2.876,3.103 c1.231,0.72,2.637,1.08,4.218,1.08c1.557,0,2.945-0.36,4.165-1.08s2.173-1.755,2.858-3.103c0.685-1.347,1.028-2.916,1.028-4.706 c0-1.789-0.343-3.358-1.028-4.706c-0.686-1.347-1.638-2.382-2.858-3.102c-1.22-0.72-2.609-1.08-4.165-1.08 C186.289,42.973,184.883,43.333,183.652,44.053z"/></g></g><path fill="#183154" d="M197.085,96.992H16.963c-1.61,0-2.915-1.305-2.915-2.915c0-1.61,1.305-2.915,2.915-2.915h180.122 c1.61,0,2.915,1.305,2.915,2.915C200,95.687,198.695,96.992,197.085,96.992z"/></svg>`;
+const LOGO_DATA_URL = 'data:image/svg+xml;utf8,' + encodeURIComponent(LOGO_SVG);
 
 // Interface pour les données de facture
 interface InvoiceData {
@@ -160,23 +165,22 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
           position: absolute;
           top: 20px;
           left: 30px;
-          width: 120px;
-          height: 120px;
-          background: white;
-          border: 3px solid white;
-          border-radius: 15px;
-          padding: 15px;
+          width: 260px;
+          height: auto;
+          background: transparent;
+          border: 0;
+          border-radius: 0;
+          padding: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          box-shadow: none;
         }
         
         .logo img {
-          max-width: 100%;
-          max-height: 100%;
+          width: 100%;
+          height: auto;
           object-fit: contain;
-          border-radius: 8px;
         }
         
         .header h1 {
@@ -194,7 +198,7 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
           display: flex;
           justify-content: space-between;
           padding: 30px;
-          border-bottom: 2px solid #f1f3f4;
+          border-bottom: 1px solid #f1f3f4;
         }
         
         .company-info, .client-info {
@@ -233,7 +237,7 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
           background: #f8f9fa;
           padding: 15px;
           border-radius: 6px;
-          border-left: 4px solid #183154;
+          border-left: 0;
         }
         
         .detail-label {
@@ -267,9 +271,9 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
         }
         
         th, td {
-          padding: 15px;
+          padding: 12px 15px;
           text-align: left;
-          border-bottom: 1px solid #e9ecef;
+          border-bottom: 1px solid #f1f3f4;
         }
         
         th {
@@ -282,7 +286,7 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
         
         .total-section {
           padding: 30px;
-          background: #f8f9fa;
+          background: #ffffff;
         }
         
         .total-row {
@@ -390,8 +394,8 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
           }
           
           .logo {
-            background: white !important;
-            border: 2px solid #183154 !important;
+            background: transparent !important;
+            border: 0 !important;
             box-shadow: none !important;
           }
           
@@ -405,7 +409,7 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
       <div class="invoice-container">
         <div class="header">
           <div class="logo">
-            <img src="/logo_nzooimmo.png" alt="N'zoo Immo Logo" onerror="this.src='/logo_nzooimmo.svg'; this.onerror=null;">
+            <img src="${LOGO_DATA_URL}" alt="N'zoo Immo Logo">
           </div>
           <h1>FACTURE</h1>
           <p>N'zoo Immo - Espaces de Travail</p>
@@ -486,7 +490,7 @@ const generateReservationInvoiceHTML = (data: ReservationData): string => {
             <tbody>
               <tr>
                 <td>
-                  <strong>${formatSpaceType(data.spaceType)}</strong><br>
+                  <strong>${getFormattedSpaceText({ activity: data.activity, space_type: data.spaceType })}</strong><br>
                   <small>${data.activity || 'Réservation d\'espace'}</small>
                 </td>
                 <td>
@@ -537,7 +541,7 @@ export const generateAndDownloadReservationInvoice = async (reservationData: Res
       city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com",
-      logo: "/logo_nzooimmo.png"
+      logo: LOGO_DATA_URL
     };
 
     // Générer le HTML de la facture
@@ -615,10 +619,10 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
         .header {
           background: #ffffff;
           color: #183154;
-          padding: 30px;
+          padding: 24px 30px 18px;
           text-align: center;
           position: relative;
-          border-bottom: 3px solid #183154;
+          border-bottom: 1px solid #e9ecef;
         }
         
         .logo {
@@ -728,8 +732,8 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
         
         .services-table h3 {
           color: #183154;
-          margin-bottom: 20px;
-          font-size: 1.3em;
+          margin-bottom: 12px;
+          font-size: 1.2em;
           font-weight: 700;
         }
         
@@ -941,7 +945,7 @@ const generateInvoiceHTML = (data: InvoiceData): string => {
             <tbody>
               <tr>
                 <td>
-                  <strong>${formatSpaceType(reservation.space_type)}</strong><br>
+                  <strong>${getFormattedSpaceText(reservation)}</strong><br>
                   <small>${reservation.activity || 'Réservation d\'espace'}</small>
                 </td>
                 <td>
@@ -999,7 +1003,7 @@ export const generateAndDownloadInvoice = async (reservation: Reservation): Prom
       city: "Kinshasa, République Démocratique du Congo",
       phone: "+243822201758",
       email: "contact@nzoo-immo.com",
-      logo: "/logo_nzooimmo.png" // Chemin vers le logo PNG dans public
+      logo: LOGO_DATA_URL
     };
 
     const invoiceData: InvoiceData = {
@@ -1126,7 +1130,7 @@ export const generatePDFInvoice = async (reservation: Reservation): Promise<void
     doc.text('Services Facturés:', 20, 160);
     
     doc.setFontSize(10);
-    doc.text(`Service: ${formatSpaceType(reservation.space_type)}`, 20, 170);
+    doc.text(`Service: ${getFormattedSpaceText(reservation)}`, 20, 170);
     doc.text(`Période: Du ${dates.startDate} au ${dates.endDate}`, 20, 175);
     doc.text(`Occupants: ${reservation.occupants} personne${reservation.occupants > 1 ? 's' : ''}`, 20, 180);
     doc.text(`Méthode de paiement: ${formatPaymentMethod(reservation.payment_method)}`, 20, 185);

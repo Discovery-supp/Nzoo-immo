@@ -24,7 +24,7 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
     authLoading 
   });
 
-  const { reservations, loading, error, updateReservationStatus, deleteReservation } = useReservations(
+  const { reservations, loading, error, updateReservationStatus, updateReservation, deleteReservation } = useReservations(
     user ? { email: user.email, role: user.role } : undefined
   );
 
@@ -311,15 +311,46 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
     if (!editingReservation) return;
     
     try {
-      // Si l'utilisateur n'est pas admin, on ne sauvegarde que le statut
-      if (editFormData.status) {
-        await updateReservationStatus(editingReservation, editFormData.status);
+      // Récupérer l'objet réservation complet à partir de l'ID
+      const reservation = reservations?.find(r => r.id === editingReservation);
+      if (!reservation) {
+        console.error('❌ Réservation non trouvée:', editingReservation);
+        showNotification('error', 'Réservation non trouvée');
+        return;
       }
+      
+      console.log('🔄 Sauvegarde de la réservation:', { editingReservation, editFormData, reservation });
+      
+      // Préparer les données de mise à jour
+      const updateData = {
+        full_name: editFormData.full_name?.trim() || reservation.full_name,
+        email: editFormData.email?.trim() || reservation.email,
+        phone: editFormData.phone?.trim() || reservation.phone,
+        company: editFormData.company?.trim() || reservation.company,
+        activity: editFormData.activity?.trim() || reservation.activity,
+        address: editFormData.address?.trim() || reservation.address,
+        space_type: editFormData.space_type || reservation.space_type,
+        start_date: editFormData.start_date || reservation.start_date,
+        end_date: editFormData.end_date || reservation.end_date,
+        occupants: editFormData.occupants || reservation.occupants,
+        subscription_type: editFormData.subscription_type || reservation.subscription_type,
+        amount: editFormData.amount || reservation.amount,
+        payment_method: editFormData.payment_method || reservation.payment_method,
+        status: editFormData.status || reservation.status,
+        notes: editFormData.notes?.trim() || reservation.notes,
+        admin_notes: editFormData.admin_notes?.trim() || reservation.admin_notes
+      };
+      
+      console.log('📝 Données de mise à jour préparées:', updateData);
+      
+      // Sauvegarder toutes les modifications
+      await updateReservation(editingReservation, updateData);
+      
       showNotification('success', t.saveSuccess);
       setEditingReservation(null);
       setEditFormData({});
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('❌ Erreur lors de la sauvegarde:', error);
       showNotification('error', t.saveError + ': ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
     }
   };

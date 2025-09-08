@@ -17,6 +17,12 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userRole, userEmail
 
   // Fonction pour charger les notifications
   const loadNotifications = async () => {
+    // Vérifier que les paramètres requis sont présents
+    if (!userRole || !userEmail) {
+      console.warn('🔔 NotificationBell - Paramètres manquants:', { userRole, userEmail });
+      return;
+    }
+    
     setLoading(true);
     try {
       console.log('🔔 NotificationBell - Chargement des notifications:', { userRole, userEmail });

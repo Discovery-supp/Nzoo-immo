@@ -539,8 +539,21 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           return;
         }
         
-        const info = dbSpaces[selectedSpace || 'coworking'];
-        console.log(`✅ Informations de l'espace ${selectedSpace} chargées depuis la base de données`);
+        // Déterminer dynamiquement l'espace effectif selon l'activité (offres spéciales)
+        const effectiveSpaceKey = (() => {
+          const activity = (formData.activity || '').toLowerCase();
+          if (activity.includes('pack') && activity.includes('bienvenu') && activity.includes('kin')) {
+            return 'accompagnement_jeunes_entrepreneuriat';
+          }
+          return selectedSpace || 'coworking';
+        })();
+
+        let info = dbSpaces[effectiveSpaceKey];
+        // Normaliser le titre affiché pour l'offre "Bienvenu à Kin"
+        if (effectiveSpaceKey === 'accompagnement_jeunes_entrepreneuriat') {
+          info = { ...info, title: 'Accompagnement de Jeunes' };
+        }
+        console.log(`✅ Informations de l'espace ${info?.title || effectiveSpaceKey} chargées depuis la base de données`);
         setSpaceInfo(info);
       } catch (error) {
         console.error('❌ Erreur lors du chargement des informations d\'espace:', error);
@@ -552,7 +565,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
     };
 
     loadSpaceInfo();
-  }, [selectedSpace, language]);
+  }, [selectedSpace, language, formData.activity]);
 
   // Charger les options d'espaces depuis la base de données
   useEffect(() => {

@@ -37,7 +37,7 @@ export const ReservationEditForm: React.FC<ReservationEditFormProps> = ({
       confirmed: 'Confirmé',
       cancelled: 'Annulé',
       completed: 'Terminé',
-      save: 'Sauvegarder',
+      save: 'Modifier',
       cancel: 'Annuler',
       restrictedAccess: 'Accès restreint - Seul le statut peut être modifié',
       adminOnly: 'Réservé aux administrateurs'
@@ -59,7 +59,7 @@ export const ReservationEditForm: React.FC<ReservationEditFormProps> = ({
       confirmed: 'Confirmed',
       cancelled: 'Cancelled',
       completed: 'Completed',
-      save: 'Save',
+      save: 'Modify',
       cancel: 'Cancel',
       restrictedAccess: 'Restricted access - Only status can be modified',
       adminOnly: 'Admin only'

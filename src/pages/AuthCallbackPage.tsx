@@ -85,7 +85,7 @@ const AuthCallbackPage: React.FC = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <img 
-            src="/logo_nzooimmo.svg" 
+            src="/logo-nzoo-immo-header.svg" 
             alt="Nzoo Immo" 
             className="h-12 mx-auto mb-4"
           />

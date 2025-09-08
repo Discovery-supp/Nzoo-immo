@@ -1,12 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeEmailWithCredentials } from './emailServiceUnified';
-
-// Configuration Supabase
-const supabaseUrl = 'https://nnkywmfxoohehtyyzzgp.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk';
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Interface pour les données d'inscription client
 export interface ClientSignupData {

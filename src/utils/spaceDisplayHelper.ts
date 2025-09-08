@@ -10,10 +10,18 @@
  */
 export const getSpaceDisplayText = (reservation: any): string => {
   // Vérifier si c'est l'offre "Bienvenu à Kin"
-  if (reservation.activity && 
-      reservation.activity.toLowerCase().includes('bienvenu') && 
-      reservation.activity.toLowerCase().includes('kin')) {
-    return 'Accompagnement des Jeunes Entrepreunariat';
+  if (reservation.activity) {
+    const a = reservation.activity.toLowerCase();
+    if (a.includes('pack') && a.includes('bienvenu') && a.includes('kin')) {
+      return 'Accompagnement de Jeunes';
+    }
+  }
+  // Vérifier si c'est l'offre "Pack Domiciliation WEB PRO"
+  if (reservation.activity) {
+    const a = reservation.activity.toLowerCase();
+    if (a.includes('domiciliation') && (a.includes('web pro') || a.includes('webpro') || a.includes('web-pro'))) {
+      return 'domiciliaiton';
+    }
   }
   
   // Pour les autres cas, retourner le type d'espace normal
@@ -26,9 +34,9 @@ export const getSpaceDisplayText = (reservation: any): string => {
  * @returns true si c'est l'offre "Bienvenu à Kin", false sinon
  */
 export const isBienvenuAKinOffer = (reservation: any): boolean => {
-  return reservation.activity && 
-         reservation.activity.toLowerCase().includes('bienvenu') && 
-         reservation.activity.toLowerCase().includes('kin');
+  if (!reservation.activity) return false;
+  const a = reservation.activity.toLowerCase();
+  return a.includes('pack') && a.includes('bienvenu') && a.includes('kin');
 };
 
 /**
@@ -39,7 +47,14 @@ export const isBienvenuAKinOffer = (reservation: any): boolean => {
  */
 export const getFormattedSpaceText = (reservation: any, defaultText: string = 'Espace non spécifié'): string => {
   if (isBienvenuAKinOffer(reservation)) {
-    return 'Accompagnement des Jeunes Entrepreunariat';
+    return 'Accompagnement de Jeunes';
+  }
+  // Affichage spécifique pour "Pack Domiciliation WEB PRO"
+  if (reservation.activity) {
+    const a = reservation.activity.toLowerCase();
+    if (a.includes('domiciliation') && (a.includes('web pro') || a.includes('webpro') || a.includes('web-pro'))) {
+      return 'domiciliaiton';
+    }
   }
   
   return reservation.space_type || defaultText;

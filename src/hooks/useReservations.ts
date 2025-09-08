@@ -121,6 +121,37 @@ export const useReservations = (filterByUser?: { email: string; role: string }) 
     }
   };
 
+  const updateReservation = async (id: string, updates: Partial<Reservation>) => {
+    try {
+      console.log('🔄 Mise à jour complète de la réservation:', { id, updates });
+      
+      const { data, error } = await supabase
+        .from('reservations')
+        .update({ 
+          ...updates, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Erreur mise à jour réservation:', error);
+        throw error;
+      }
+      
+      console.log('✅ Réservation mise à jour avec succès:', data);
+      
+      // Recharger les réservations
+      await fetchReservations();
+      
+      return data;
+    } catch (err) {
+      console.error('❌ Erreur mise à jour réservation:', err);
+      throw new Error('Erreur lors de la mise à jour de la réservation');
+    }
+  };
+
   const deleteReservation = async (id: string) => {
     try {
       const { error } = await supabase
@@ -149,6 +180,7 @@ export const useReservations = (filterByUser?: { email: string; role: string }) 
     error,
     refetch: fetchReservations,
     updateReservationStatus,
+    updateReservation,
     deleteReservation
   };
 };

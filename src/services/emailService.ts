@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { getFormattedSpaceText } from '../utils/spaceDisplayHelper';
 
 export interface EmailData {
   to: string;
@@ -291,16 +292,7 @@ export const sendAdminAcknowledgmentEmail = async (reservationData: EmailData['r
 
 // Fonction pour générer l'email de confirmation client
 const generateClientConfirmationEmailHtml = (reservationData: EmailData['reservationData']): string => {
-  const formatSpaceType = (spaceType: string) => {
-    const types: Record<string, string> = {
-      'coworking': 'Espace Coworking',
-      'bureau_prive': 'Bureau Privé',
-      'bureau-prive': 'Bureau Privé',
-      'domiciliation': 'Service de Domiciliation',
-      'salle-reunion': 'Salle de Réunion'
-    };
-    return types[spaceType] || spaceType;
-  };
+  const getSpaceText = () => getFormattedSpaceText({ activity: reservationData.activity, space_type: reservationData.spaceType });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -361,7 +353,7 @@ const generateClientConfirmationEmailHtml = (reservationData: EmailData['reserva
                     
                     <div class="detail-row">
                         <span class="detail-label">Type d'espace :</span>
-                        <span class="detail-value">${formatSpaceType(reservationData.spaceType)}</span>
+                        <span class="detail-value">${getSpaceText()}</span>
                     </div>
                     
                     <div class="detail-row">
@@ -416,16 +408,7 @@ const generateClientConfirmationEmailHtml = (reservationData: EmailData['reserva
 
 // Fonction pour générer l'email d'accusé de réception pour l'administration
 const generateAdminAcknowledgmentEmailHtml = (reservationData: EmailData['reservationData']): string => {
-  const formatSpaceType = (spaceType: string) => {
-    const types: Record<string, string> = {
-      'coworking': 'Espace Coworking',
-      'bureau_prive': 'Bureau Privé',
-      'bureau-prive': 'Bureau Privé',
-      'domiciliation': 'Service de Domiciliation',
-      'salle-reunion': 'Salle de Réunion'
-    };
-    return types[spaceType] || spaceType;
-  };
+  const getSpaceTextAdmin = () => getFormattedSpaceText({ activity: reservationData.activity, space_type: reservationData.spaceType });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -502,7 +485,7 @@ const generateAdminAcknowledgmentEmailHtml = (reservationData: EmailData['reserv
                     
                     <div class="detail-row">
                         <span class="detail-label">Type d'espace :</span>
-                        <span class="detail-value">${formatSpaceType(reservationData.spaceType)}</span>
+                        <span class="detail-value">${getSpaceTextAdmin()}</span>
                     </div>
                     
                     <div class="detail-row">

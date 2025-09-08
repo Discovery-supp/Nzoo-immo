@@ -91,7 +91,7 @@ const ClientSignupPage: React.FC = () => {
           
           <div className="mb-4">
             <img 
-              src="/logo_nzooimmo.svg" 
+              src="/logo-nzoo-immo-header.svg" 
               alt="Nzoo Immo" 
               className="h-12 mx-auto"
             />

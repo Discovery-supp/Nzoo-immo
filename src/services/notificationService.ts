@@ -28,6 +28,17 @@ class NotificationService {
     try {
       console.log('🔔 Chargement des notifications pour:', { userRole, userEmail });
       
+      // Validation des paramètres d'entrée
+      if (!userRole || userRole.trim() === '') {
+        console.warn('🔒 ATTENTION: Rôle utilisateur vide ou non défini, utilisation du rôle par défaut "clients"');
+        userRole = 'clients';
+      }
+      
+      if (!userEmail || userEmail.trim() === '') {
+        console.warn('🔒 ATTENTION: Email utilisateur vide ou non défini');
+        return [];
+      }
+      
       // Vérification de sécurité : les clients ne peuvent voir que leurs propres réservations
       if (userRole === 'clients') {
         if (!userEmail) {

@@ -8,6 +8,11 @@ if (import.meta.env.DEV) {
   console.log('🔍 Supabase configuration check:');
   console.log('URL:', supabaseUrl ? 'Set' : 'Missing');
   console.log('Key:', supabaseAnonKey ? 'Set' : 'Missing');
+  
+  // Vérifier si une instance existe déjà
+  if (typeof window !== 'undefined' && (window as any).__supabase_instance_created) {
+    console.warn('⚠️ Multiple Supabase instances detected! This may cause authentication issues.');
+  }
 }
 
 // Vérifier si les variables d'environnement sont définies
@@ -20,7 +25,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   }
 }
 
-// Créer le client Supabase avec fallback
+// Créer le client Supabase avec fallback et configuration optimisée
 export const supabase = createClient(
   supabaseUrl || 'https://nnkywmfxoohehtyyzzgp.supabase.co',
   supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk',
@@ -28,6 +33,8 @@ export const supabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
     },
     db: {
       schema: 'public'
@@ -36,9 +43,19 @@ export const supabase = createClient(
       headers: {
         'X-Client-Info': 'nzoo-immo-web'
       }
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
     }
   }
 );
+
+// Marquer qu'une instance a été créée (pour détecter les instances multiples)
+if (typeof window !== 'undefined') {
+  (window as any).__supabase_instance_created = true;
+}
 
 // Fonction de test de connexion améliorée
 export const testSupabaseConnection = async () => {

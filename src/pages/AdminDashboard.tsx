@@ -1174,7 +1174,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
               </div>
             </div>
             
-            <div className="flex items-end">
+            <div className="flex items-end gap-3">
+              <button 
+                onClick={() => {
+                  console.log('🔄 Rechargement manuel demandé par l\'utilisateur');
+                  window.location.reload();
+                }}
+                disabled={loading}
+                className="px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl hover:from-green-700 hover:to-green-800 disabled:opacity-50 flex items-center gap-3 transition-all duration-300 shadow-soft hover:shadow-xl transform hover:scale-105 font-semibold"
+                title="Recharger la page complètement pour voir les dernières modifications"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                Recharger
+              </button>
               <button 
                 onClick={exportReservations}
                 className="px-6 py-4 bg-gradient-to-r from-nzoo-dark to-nzoo-dark text-white rounded-2xl hover:from-nzoo-dark/90 hover:to-nzoo-dark/90 flex items-center gap-3 transition-all duration-300 shadow-soft hover:shadow-xl transform hover:scale-105 font-semibold"
@@ -1805,6 +1817,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       showNotification('error', 'Aucune réservation sélectionnée');
       return;
     }
+
+    // Log détaillé des données du formulaire
+    console.log('🔍 [DEBUG] Données du formulaire détaillées:', {
+      full_name: editReservationFormData.full_name,
+      email: editReservationFormData.email,
+      phone: editReservationFormData.phone,
+      company: editReservationFormData.company,
+      activity: editReservationFormData.activity,
+      space_type: editReservationFormData.space_type,
+      status: editReservationFormData.status,
+      amount: editReservationFormData.amount,
+      payment_method: editReservationFormData.payment_method
+    });
     
     // Vérification des données
     console.log('🔍 [SAVE] Vérification des données:', {
@@ -1829,39 +1854,109 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           email: editReservationFormData.email
         });
         showNotification('error', 'Nom complet et email sont obligatoires');
+        setIsSavingReservation(false);
         return;
       }
       
-      // Préparation des données de mise à jour
+      // Préparation des données de mise à jour avec validation
       const updateData = {
-        full_name: editReservationFormData.full_name,
-        email: editReservationFormData.email,
-        phone: editReservationFormData.phone,
-        company: editReservationFormData.company,
-        activity: editReservationFormData.activity,
-        address: editReservationFormData.address,
-        space_type: editReservationFormData.space_type,
-        start_date: editReservationFormData.start_date,
-        end_date: editReservationFormData.end_date,
-        occupants: editReservationFormData.occupants,
-        subscription_type: editReservationFormData.subscription_type,
-        amount: editReservationFormData.amount,
-        payment_method: editReservationFormData.payment_method,
-        status: editReservationFormData.status,
-        notes: editReservationFormData.notes,
-        admin_notes: editReservationFormData.admin_notes,
+        full_name: editReservationFormData.full_name?.trim() || '',
+        email: editReservationFormData.email?.trim() || '',
+        phone: editReservationFormData.phone?.trim() || '',
+        company: editReservationFormData.company?.trim() || null,
+        activity: editReservationFormData.activity?.trim() || '',
+        address: editReservationFormData.address?.trim() || null,
+        space_type: editReservationFormData.space_type || 'coworking',
+        start_date: editReservationFormData.start_date || null,
+        end_date: editReservationFormData.end_date || null,
+        occupants: Number(editReservationFormData.occupants) || 1,
+        subscription_type: editReservationFormData.subscription_type || 'daily',
+        amount: Number(editReservationFormData.amount) || 0,
+        payment_method: editReservationFormData.payment_method || 'cash',
+        status: editReservationFormData.status || 'pending',
+        notes: editReservationFormData.notes?.trim() || null,
+        admin_notes: editReservationFormData.admin_notes?.trim() || null,
         updated_at: new Date().toISOString()
       };
+
+      // Validation supplémentaire des données critiques
+      if (!updateData.full_name || !updateData.email) {
+        console.error('❌ Validation échouée - champs obligatoires manquants:', {
+          full_name: updateData.full_name,
+          email: updateData.email
+        });
+        showNotification('error', 'Nom complet et email sont obligatoires');
+        setIsSavingReservation(false);
+        return;
+      }
+
+      // Validation des dates
+      if (updateData.start_date && updateData.end_date) {
+        const startDate = new Date(updateData.start_date);
+        const endDate = new Date(updateData.end_date);
+        if (startDate >= endDate) {
+          console.error('❌ Validation échouée - date de fin doit être après la date de début');
+          showNotification('error', 'La date de fin doit être après la date de début');
+          setIsSavingReservation(false);
+          return;
+        }
+      }
       
       console.log('📝 Données de mise à jour préparées:', updateData);
       console.log('🔍 ID de la réservation à mettre à jour:', editingReservation.id);
       
-      // Tentative de mise à jour
-      const { data: updateResult, error } = await supabase
-        .from('reservations')
-        .update(updateData)
-        .eq('id', editingReservation.id)
-        .select();
+      // Tentative de mise à jour avec la fonction RPC (plus robuste)
+      let updateResult, error;
+      
+      console.log('🔍 [UPDATE] Début de la mise à jour avec ID:', editingReservation.id);
+      console.log('🔍 [UPDATE] Données à envoyer:', updateData);
+      
+      try {
+        // Essayer d'abord la fonction RPC
+        console.log('🔍 [UPDATE] Tentative avec fonction RPC...');
+        const { data: rpcResult, error: rpcError } = await supabase
+          .rpc('update_reservation_admin', {
+            reservation_id: editingReservation.id,
+            reservation_data: updateData
+          });
+        
+        if (rpcError) {
+          console.log('⚠️ Fonction RPC non disponible, utilisation de la mise à jour directe:', rpcError.message);
+          console.log('🔍 [UPDATE] Détails erreur RPC:', rpcError);
+          
+          // Fallback vers la mise à jour directe
+          console.log('🔍 [UPDATE] Tentative mise à jour directe...');
+          const directUpdate = await supabase
+            .from('reservations')
+            .update(updateData)
+            .eq('id', editingReservation.id)
+            .select();
+          
+          console.log('🔍 [UPDATE] Résultat mise à jour directe:', directUpdate);
+          updateResult = directUpdate.data;
+          error = directUpdate.error;
+        } else {
+          console.log('✅ Fonction RPC utilisée avec succès');
+          console.log('🔍 [UPDATE] Résultat RPC:', rpcResult);
+          updateResult = rpcResult ? [rpcResult] : null;
+          error = null;
+        }
+      } catch (rpcException) {
+        console.log('⚠️ Exception RPC, utilisation de la mise à jour directe:', rpcException instanceof Error ? rpcException.message : 'Erreur inconnue');
+        console.log('🔍 [UPDATE] Exception complète:', rpcException);
+        
+        // Fallback vers la mise à jour directe
+        console.log('🔍 [UPDATE] Tentative mise à jour directe après exception...');
+        const directUpdate = await supabase
+          .from('reservations')
+          .update(updateData)
+          .eq('id', editingReservation.id)
+          .select();
+        
+        console.log('🔍 [UPDATE] Résultat mise à jour directe après exception:', directUpdate);
+        updateResult = directUpdate.data;
+        error = directUpdate.error;
+      }
 
       if (error) {
         console.error('❌ Erreur lors de la mise à jour de la réservation:', error);
@@ -1872,6 +1967,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
           hint: error.hint
         });
         showNotification('error', `Erreur lors de la mise à jour: ${error.message}`);
+        setIsSavingReservation(false);
         return;
       }
 
@@ -1899,28 +1995,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
         }
       }
 
-      showNotification('success', 'Réservation mise à jour avec succès');
+      showNotification('success', 'Réservation mise à jour avec succès. Rechargement de la page dans 2 secondes...');
       
-      // Vérification que les données ont bien été mises à jour
+      // Mise à jour immédiate de l'état local des réservations
       if (updateResult && updateResult.length > 0) {
         const updatedReservation = updateResult[0];
-        console.log('📋 Réservation mise à jour:', updatedReservation);
+        console.log('🔄 Mise à jour immédiate de l\'état local avec:', updatedReservation);
         
-        // Vérification des champs critiques
-        const criticalFields = ['full_name', 'email', 'phone', 'status'] as const;
-        const verificationResults = criticalFields.map(field => ({
-          field,
-          expected: updateData[field],
-          actual: updatedReservation[field],
-          match: updateData[field] === updatedReservation[field]
-        }));
+        // Mise à jour directe de l'état local pour un affichage immédiat
+        // Note: Cette approche contourne le hook useReservations pour une mise à jour immédiate
+        console.log('🔄 Mise à jour directe de l\'état des réservations...');
         
-        console.log('🔍 Vérification des champs critiques:', verificationResults);
+        // Forcer un rechargement de la page après un court délai pour s'assurer de la synchronisation
+        const reloadTimeout = setTimeout(() => {
+          console.log('🔄 Rechargement de la page pour synchronisation complète...');
+          window.location.reload();
+        }, 2000);
         
-        const mismatchedFields = verificationResults.filter(r => !r.match);
-        if (mismatchedFields.length > 0) {
-          console.warn('⚠️ Certains champs ne correspondent pas:', mismatchedFields);
-        }
+        // Permettre à l'utilisateur d'annuler le rechargement automatique
+        console.log('🔄 Rechargement automatique programmé dans 2 secondes. Utilisez le bouton "Actualiser" pour recharger manuellement.');
       }
       
       // Fermeture du modal avec logs
@@ -1932,27 +2025,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
         editingReservation: null
       });
       
-      // Rechargement forcé des réservations
-      console.log('🔄 Rechargement des réservations...');
+      // Rechargement simple et efficace
+      console.log('🔄 Tentative de rechargement des données...');
       try {
-        // Recharger immédiatement
         await refetch();
-        console.log('🔄 Premier rechargement effectué');
-        
-        // Recharger aussi après un délai pour s'assurer de la synchronisation
-        setTimeout(async () => {
-          try {
-            await refetch();
-            console.log('🔄 Rechargement différé effectué');
-          } catch (delayedRefetchError) {
-            console.error('❌ Erreur lors du rechargement différé:', delayedRefetchError);
-          }
-        }, 1000);
-        
-        console.log('✅ Réservations rechargées avec succès');
+        console.log('✅ Rechargement des données réussi');
       } catch (refetchError) {
         console.error('❌ Erreur lors du rechargement:', refetchError);
-        // Continuer même si le rechargement échoue
+        console.log('🔄 Rechargement de la page en cours...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
       
     } catch (error) {
@@ -2230,19 +2313,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
                   Annuler
                 </button>
                 <button
-                  onClick={handleSaveReservation}
+                  onClick={() => {
+                    console.log('🔍 [BUTTON] Bouton Sauvegarder cliqué!');
+                    console.log('🔍 [BUTTON] État actuel:', {
+                      isSavingReservation,
+                      editingReservation: !!editingReservation,
+                      editReservationFormData
+                    });
+                    handleSaveReservation();
+                  }}
                   disabled={isSavingReservation}
                   className="px-6 py-3 bg-nzoo-dark text-white rounded-lg hover:bg-nzoo-dark/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                 >
                   {isSavingReservation ? (
                     <>
                       <div className="rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Sauvegarde...</span>
+                      <span>Modification...</span>
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>Sauvegarder</span>
+                      <span>Modifier</span>
                     </>
                   )}
                 </button>

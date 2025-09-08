@@ -145,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({ language, setLanguage, isAuthenticated,
             <Link to="/" className="flex items-center group">
               <div className="relative">
                 <img 
-                  src="/logo_nzooimmo.svg" 
+                  src="/logo-nzoo-immo-header.svg" 
                   alt="Nzoo Immo" 
                   className="h-14 w-auto object-contain transition-all duration-500 group-hover:scale-110 group-hover:drop-shadow-lg"
                   onError={(e) => {
@@ -239,10 +239,12 @@ const Header: React.FC<HeaderProps> = ({ language, setLanguage, isAuthenticated,
               {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
                   {/* Notifications */}
-                  <NotificationBell 
-                    userRole={userRole || authUser?.role || ''} 
-                    userEmail={currentUser?.email || authUser?.email || ''} 
-                  />
+                  {(currentUser?.email || authUser?.email) && (
+                    <NotificationBell 
+                      userRole={userRole || authUser?.role || 'clients'} 
+                      userEmail={currentUser?.email || authUser?.email || ''} 
+                    />
+                  )}
                   
                                      {/* User info */}
                    <div className="hidden md:flex items-center space-x-3 bg-nzoo-dark/10 rounded-2xl px-4 py-2 border border-nzoo-dark/20">

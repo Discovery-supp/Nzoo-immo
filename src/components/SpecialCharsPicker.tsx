@@ -225,3 +225,6 @@ const SpecialCharsPicker: React.FC<SpecialCharsPickerProps> = ({
 };
 
 export default SpecialCharsPicker;
+
+
+
