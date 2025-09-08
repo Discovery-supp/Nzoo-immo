@@ -3,6 +3,9 @@
  * Gère tous les types d'emails (confirmation, annulation, bienvenue) avec le design officiel
  */
 
+// Import de la fonction helper pour l'affichage des espaces
+const { getFormattedSpaceText } = require('../utils/spaceDisplayHelper');
+
 // Configuration Supabase
 const SUPABASE_URL = 'https://nnkywmfxoohehtyyzzgp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua3l3bWZ4b29oZWh0eXl6emdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDQ3NTcsImV4cCI6MjA2OTcyMDc1N30.VZtsHLfbVks1uLhfnjW6uJSP0-J-Z30-WWT5D_B8Jpk';
@@ -323,7 +326,7 @@ export const sendReservationConfirmationEmail = async (reservation: any) => {
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${reservation.space_type}</span>
+                <span class="detail-value">${getFormattedSpaceText(reservation)}</span>
             </div>
             
             <div class="detail-row">
@@ -395,7 +398,7 @@ export const sendReservationCancellationEmail = async (reservation: any) => {
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${reservation.space_type}</span>
+                <span class="detail-value">${getFormattedSpaceText(reservation)}</span>
             </div>
             
             <div class="detail-row">
@@ -468,7 +471,7 @@ export const sendReservationCompletionEmail = async (reservation: any) => {
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${reservation.space_type}</span>
+                <span class="detail-value">${getFormattedSpaceText(reservation)}</span>
             </div>
             
             <div class="detail-row">

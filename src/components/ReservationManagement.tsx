@@ -264,11 +264,18 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
     }
   };
 
-  const formatSpaceType = (spaceType: string) => {
+  const formatSpaceType = (spaceType: string, reservation?: any) => {
+    // Si on a une réservation complète, utiliser la logique de l'offre "Bienvenu à Kin"
+    if (reservation) {
+      const { getFormattedSpaceText } = require('../utils/spaceDisplayHelper');
+      return getFormattedSpaceText(reservation, 'Espace non spécifié');
+    }
+    
     const types = {
       'coworking': 'Espace Coworking',
       'bureau-prive': 'Bureau Privé',
-  
+      'salle-reunion': 'Salle de Réunion',
+      'accompagnement_jeunes_entrepreneuriat': 'Accompagnement Jeunes'
     };
     return types[spaceType as keyof typeof types] || spaceType;
   };
@@ -886,7 +893,7 @@ const ReservationManagement: React.FC<ReservationManagementProps> = ({ language 
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{formatSpaceType(reservation.space_type)}</div>
+                      <div className="text-sm text-gray-900">{formatSpaceType(reservation.space_type, reservation)}</div>
                       <div className="text-sm text-gray-500">{reservation.occupants} personnes</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

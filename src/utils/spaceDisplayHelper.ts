@@ -9,13 +9,19 @@
  * @returns Le texte à afficher pour l'espace
  */
 export const getSpaceDisplayText = (reservation: any): string => {
-  // Vérifier si c'est l'offre "Bienvenu à Kin"
+  // Vérifier si c'est l'offre "Bienvenu à Kin" par space_type
+  if (reservation.space_type === 'accompagnement_jeunes_entrepreneuriat') {
+    return 'Accompagnement Jeunes';
+  }
+  
+  // Vérifier si c'est l'offre "Bienvenu à Kin" par activity (fallback)
   if (reservation.activity) {
     const a = reservation.activity.toLowerCase();
     if (a.includes('pack') && a.includes('bienvenu') && a.includes('kin')) {
-      return 'Accompagnement de Jeunes';
+      return 'Accompagnement Jeunes';
     }
   }
+  
   // Vérifier si c'est l'offre "Pack Domiciliation WEB PRO"
   if (reservation.activity) {
     const a = reservation.activity.toLowerCase();
@@ -46,9 +52,16 @@ export const isBienvenuAKinOffer = (reservation: any): boolean => {
  * @returns Le texte formaté pour l'affichage
  */
 export const getFormattedSpaceText = (reservation: any, defaultText: string = 'Espace non spécifié'): string => {
-  if (isBienvenuAKinOffer(reservation)) {
-    return 'Accompagnement de Jeunes';
+  // Vérifier si c'est l'offre "Bienvenu à Kin" par space_type
+  if (reservation.space_type === 'accompagnement_jeunes_entrepreneuriat') {
+    return 'Accompagnement Jeunes';
   }
+  
+  // Vérifier si c'est l'offre "Bienvenu à Kin" par activity (fallback)
+  if (isBienvenuAKinOffer(reservation)) {
+    return 'Accompagnement Jeunes';
+  }
+  
   // Affichage spécifique pour "Pack Domiciliation WEB PRO"
   if (reservation.activity) {
     const a = reservation.activity.toLowerCase();

@@ -177,7 +177,9 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
     setFormData(prev => ({
       ...prev,
       occupants: 1,
-      subscriptionType: spaceKey === 'coworking' ? 'daily' : 'monthly'
+      subscriptionType: spaceKey === 'coworking' ? 'daily' : 'monthly',
+      // Définir automatiquement l'activité pour l'offre "Pack Bienvenu à Kin"
+      activity: spaceKey === 'accompagnement_jeunes_entrepreneuriat' ? 'Pack Bienvenu à Kin' : prev.activity
     }));
   };
 
@@ -728,11 +730,12 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
           userAgent: navigator.userAgent,
         });
       } catch {}
-      // Déterminer le type d'espace basé sur l'activité pour l'offre "Bienvenu à Kin"
+      // Déterminer le type d'espace basé sur l'offre sélectionnée
       let finalSpaceType = selectedSpace || 'coworking';
-      if (formData.activity && 
-          formData.activity.toLowerCase().includes('bienvenu') && 
-          formData.activity.toLowerCase().includes('kin')) {
+      if (selectedSpace === 'accompagnement_jeunes_entrepreneuriat' || 
+          (formData.activity && 
+           formData.activity.toLowerCase().includes('bienvenu') && 
+           formData.activity.toLowerCase().includes('kin'))) {
         finalSpaceType = 'accompagnement_jeunes_entrepreneuriat';
         console.log('🎯 Offre "Bienvenu à Kin" détectée, espace changé en:', finalSpaceType);
       }
@@ -857,11 +860,12 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
 
     try {
       console.log('🔍 [DEBUG] Préparation des données de réservation');
-      // Déterminer le type d'espace basé sur l'activité pour l'offre "Bienvenu à Kin"
+      // Déterminer le type d'espace basé sur l'offre sélectionnée
       let finalSpaceType = selectedSpace || 'coworking';
-      if (formData.activity && 
-          formData.activity.toLowerCase().includes('bienvenu') && 
-          formData.activity.toLowerCase().includes('kin')) {
+      if (selectedSpace === 'accompagnement_jeunes_entrepreneuriat' || 
+          (formData.activity && 
+           formData.activity.toLowerCase().includes('bienvenu') && 
+           formData.activity.toLowerCase().includes('kin'))) {
         finalSpaceType = 'accompagnement_jeunes_entrepreneuriat';
         console.log('🎯 Offre "Bienvenu à Kin" détectée, espace changé en:', finalSpaceType);
       }
@@ -1287,16 +1291,29 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
                   {t.form.autoFilled}
                 </span>
               )}
+              {selectedSpace === 'accompagnement_jeunes_entrepreneuriat' && (
+                <span className="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                  Auto-défini
+                </span>
+              )}
             </label>
             <input
               type="text"
               name="activity"
               value={formData.activity}
               onChange={handleInputChange}
-              className="block w-full rounded-xl border-2 border-primary-200 px-4 py-4 shadow-soft focus:border-nzoo-dark focus:ring-2 focus:ring-nzoo-dark/20 transition-all duration-300 text-nzoo-dark placeholder-primary-400 font-body"
+              className={`block w-full rounded-xl border-2 border-primary-200 px-4 py-4 shadow-soft focus:border-nzoo-dark focus:ring-2 focus:ring-nzoo-dark/20 transition-all duration-300 text-nzoo-dark placeholder-primary-400 font-body ${
+                selectedSpace === 'accompagnement_jeunes_entrepreneuriat' ? 'bg-blue-50 cursor-not-allowed' : ''
+              }`}
               placeholder="Votre activité professionnelle"
               required
+              readOnly={selectedSpace === 'accompagnement_jeunes_entrepreneuriat'}
             />
+            {selectedSpace === 'accompagnement_jeunes_entrepreneuriat' && (
+              <p className="text-sm text-blue-600 mt-2 font-body">
+                L'activité est automatiquement définie pour l'offre "Pack Bienvenu à Kin"
+              </p>
+            )}
           </div>
 
           <div>

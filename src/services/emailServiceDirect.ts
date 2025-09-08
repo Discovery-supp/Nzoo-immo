@@ -328,7 +328,7 @@ export const sendClientConfirmationEmail = async (reservation: any) => {
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${(reservation.activity && (()=>{const a=reservation.activity.toLowerCase();return a.includes('pack')&&a.includes('bienvenu')&&a.includes('kin');})()) ? 'Accompagnement de Jeunes' : reservation.space_type}</span>
+                <span class="detail-value">${(reservation.space_type === 'accompagnement_jeunes_entrepreneuriat' || (reservation.activity && (()=>{const a=reservation.activity.toLowerCase();return a.includes('pack')&&a.includes('bienvenu')&&a.includes('kin');})())) ? 'Accompagnement Jeunes' : reservation.space_type}</span>
             </div>
             
             <div class="detail-row">
@@ -406,7 +406,7 @@ export const sendClientPaymentPendingEmail = async (reservation: any) => {
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${(reservation.activity && (()=>{const a=reservation.activity.toLowerCase();return a.includes('pack')&&a.includes('bienvenu')&&a.includes('kin');})()) ? 'Accompagnement de Jeunes' : reservation.space_type}</span>
+                <span class="detail-value">${(reservation.space_type === 'accompagnement_jeunes_entrepreneuriat' || (reservation.activity && (()=>{const a=reservation.activity.toLowerCase();return a.includes('pack')&&a.includes('bienvenu')&&a.includes('kin');})())) ? 'Accompagnement Jeunes' : reservation.space_type}</span>
             </div>
             
             <div class="detail-row">
@@ -508,7 +508,7 @@ export const sendClientCancellationEmail = async (reservation: any) => {
             
             <div class="detail-row">
                 <span class="detail-label">Espace :</span>
-                <span class="detail-value">${(reservation.activity && (()=>{const a=reservation.activity.toLowerCase();return a.includes('pack')&&a.includes('bienvenu')&&a.includes('kin');})()) ? 'Accompagnement de Jeunes' : reservation.space_type}</span>
+                <span class="detail-value">${(reservation.space_type === 'accompagnement_jeunes_entrepreneuriat' || (reservation.activity && (()=>{const a=reservation.activity.toLowerCase();return a.includes('pack')&&a.includes('bienvenu')&&a.includes('kin');})())) ? 'Accompagnement Jeunes' : reservation.space_type}</span>
             </div>
             
             <div class="detail-row">
