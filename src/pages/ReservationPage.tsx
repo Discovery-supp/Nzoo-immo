@@ -760,6 +760,11 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         transactionId: cashTransactionId,
       };
 
+      console.log('🔍 [DEBUG] Données de réservation CASH envoyées au service:', reservationData);
+      console.log('🔍 [DEBUG] selectedSpace:', selectedSpace);
+      console.log('🔍 [DEBUG] finalSpaceType:', finalSpaceType);
+      console.log('🔍 [DEBUG] formData.activity:', formData.activity);
+
       const result = await createReservation(reservationData);
       
       if (result.success) {
@@ -890,7 +895,10 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
         transactionId: `${selectedPaymentMethod.toUpperCase()}_${Date.now()}`,
       };
 
-      console.log('🔍 [DEBUG] Données de réservation:', reservationData);
+      console.log('🔍 [DEBUG] Données de réservation envoyées au service:', reservationData);
+      console.log('🔍 [DEBUG] selectedSpace:', selectedSpace);
+      console.log('🔍 [DEBUG] finalSpaceType:', finalSpaceType);
+      console.log('🔍 [DEBUG] formData.activity:', formData.activity);
 
       // Paiement en espèces ou autres méthodes
       console.log('🔍 [DEBUG] Paiement standard (espèces)');

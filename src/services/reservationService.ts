@@ -44,11 +44,23 @@ export const createReservation = async (data: ReservationData): Promise<Reservat
 
     // Étape 2: Préparer les données pour la base de données
     // Déterminer et normaliser le type d'espace selon l'offre sélectionnée
+    console.log('🔍 [RESERVATION] Données reçues:', { 
+      spaceType: data.spaceType, 
+      activity: data.activity,
+      fullName: data.fullName 
+    });
+    
     let normalizedSpaceType = data.spaceType || 'coworking';
+    console.log('🔍 [RESERVATION] spaceType initial:', normalizedSpaceType);
+    
     if (data.spaceType === 'accompagnement_jeunes_entrepreneuriat' || 
         (data.activity && data.activity.toLowerCase().includes('pack') && data.activity.toLowerCase().includes('bienvenu') && data.activity.toLowerCase().includes('kin'))) {
       normalizedSpaceType = 'accompagnement_jeunes_entrepreneuriat';
       console.log('🎯 [RESERVATION] Offre "Bienvenu à Kin" détectée → space_type normalisé:', normalizedSpaceType);
+    } else {
+      console.log('❌ [RESERVATION] Offre "Bienvenu à Kin" NON détectée. Conditions:');
+      console.log('  - data.spaceType === "accompagnement_jeunes_entrepreneuriat":', data.spaceType === 'accompagnement_jeunes_entrepreneuriat');
+      console.log('  - data.activity contient "pack bienvenu kin":', data.activity && data.activity.toLowerCase().includes('pack') && data.activity.toLowerCase().includes('bienvenu') && data.activity.toLowerCase().includes('kin'));
     }
 
     const reservationData = {
