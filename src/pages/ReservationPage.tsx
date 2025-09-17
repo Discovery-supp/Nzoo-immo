@@ -1488,22 +1488,7 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
             </div>
           )}
 
-          {/* Message informatif sur les méthodes de paiement */}
-          <div className="mb-8 p-6 rounded-2xl border-2 border-green-200 bg-green-50 backdrop-blur-sm">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Banknote className="w-6 h-6 text-green-600" />
-              </div>
-              <h4 className="text-green-800 text-lg font-semibold mb-2">
-                {language === 'fr' ? 'Méthodes de paiement disponibles' : 'Available payment methods'}
-              </h4>
-              <p className="text-green-700 text-center font-medium">
-                {language === 'fr'
-                  ? "Actuellement, seul le paiement en espèces est disponible. Les paiements par carte VISA et Mobile Money seront bientôt intégrés. Merci de régler votre réservation sur place lors de votre arrivée."
-                  : "Currently, only cash payment is available. VISA card and Mobile Money payments will be integrated soon. Please pay for your reservation on-site upon arrival."}
-              </p>
-            </div>
-          </div>
+          {/* Message informatif sur les méthodes de paiement supprimé */}
 
           {/* Message informatif pour le paiement en espèces */}
           {selectedPaymentMethod === 'CASH' && (

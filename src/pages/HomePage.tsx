@@ -451,7 +451,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                   <img
-                    src="/Photo_ensemble.jpeg"
+                    src="/WhatsApp Image 2025-07-11 à 10.17.26_243d1eea.jpg"
                     alt="N'zoo Immo - Équipe et espaces de travail modernes"
                     className="w-full h-64 sm:h-80 lg:h-96 object-cover"
                     loading="lazy"
@@ -1078,7 +1078,7 @@ const HomePage: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 whileHover={{ scale: 1.02, y: -5 }}
-                className="hidden group relative bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500"
+                className="group relative bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500"
               >
                 {/* Background decoration amélioré */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full blur-3xl opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
