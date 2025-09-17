@@ -1,4 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿// --- Audit Log ---
+import AdminAuditLog from '../components/AdminAuditLog';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   BarChart3, 
@@ -2067,6 +2069,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
       { id: 'statistics', label: t.tabs.statistics, icon: TrendingUp },
       { id: 'users', label: t.tabs.users, icon: Users },
       { id: 'aiFollowUps', label: 'Relances IA', icon: Brain },
+      { id: 'audit', label: 'Audit', icon: BarChart3 },
       { id: 'profile', label: 'Mon Profil', icon: User }
     ])
   ];
@@ -2183,7 +2186,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
                     key={tab.id}
                     id={`tab-${tab.id}`}
                     onClick={() => {
-                      console.log('�� Clic sur l\'onglet:', tab.id);
+                      try {
+                        const { AuditService } = require('../services/auditService');
+                        AuditService.record({
+                          actorId: userProfile?.id || 'admin',
+                          actorRole: (userProfile?.role === 'admin' ? 'admin' : 'staff'),
+                          action: 'UPDATE',
+                          target: `tab:${tab.id}`,
+                          metadata: { type: 'PAGE_VIEW', label: tab.label },
+                          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+                        });
+                      } catch {}
                       setActiveTab(tab.id);
                     }}
                     className={`flex-shrink-0 whitespace-nowrap py-4 px-6 rounded-2xl font-medium text-sm flex items-center justify-center space-x-2 transition-all duration-300 font-poppins min-w-max ${
@@ -2205,10 +2218,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ language }) => {
         <div className="animate-fadeIn bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 mt-12">
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'reservations' && renderReservations()}
-          {activeTab === 'reservationManagement' && <ReservationManagement language={language} />}
-          {activeTab === 'spaces' && <SpaceManagementForm language={language} />}
-          {activeTab === 'revenue' && renderRevenue()}
-          {activeTab === 'clients' && renderClients()}
+          {activeTab === 'reservationManagement' && (console.log('AUDIT_PAGE_VIEW','reservationManagement'), <ReservationManagement language={language} />)}
+          {activeTab === 'spaces' && (console.log('AUDIT_PAGE_VIEW','spaces'), <SpaceManagementForm language={language} />)}
+          {activeTab === 'revenue' && (console.log('AUDIT_PAGE_VIEW','revenue'), renderRevenue())}
+          {activeTab === 'audit' && (
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-nzoo-dark">Journal d'audit</h3>
+              <AdminAuditLog actorRoleFilter="all" />
+            </div>
+          )}
+          {activeTab === 'clients' && (console.log('AUDIT_PAGE_VIEW','clients'), renderClients())}
           {activeTab === 'aiFollowUps' && <AIFollowUpManager language={language} />}
           {activeTab === 'profile' && (
             <div className="flex items-center justify-center min-h-[400px]">

@@ -2,6 +2,7 @@
 import { X, User, Mail, Phone, Building, Calendar, Camera, Edit3, Save, Eye, EyeOff, Shield, Crown } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { profileService } from '../services/profileService';
+import { AuditService } from '../services/auditService';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -80,6 +81,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       const result = await profileService.updateProfile(user.id, updateData);
       
       if (result.success) {
+        try {
+          AuditService.record({
+            actorId: user.id,
+            actorRole: user.role === 'admin' ? 'admin' : 'staff',
+            action: 'PROFILE_UPDATE',
+            metadata: { updated: Object.keys(updateData) },
+            userAgent: navigator.userAgent,
+          });
+        } catch {}
         setMessage({ type: 'success', text: result.message });
         setIsEditing(false);
         

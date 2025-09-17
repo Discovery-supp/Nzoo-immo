@@ -7,6 +7,7 @@ import { createReservation } from '../services/reservationService';
 import { checkSpaceAvailability, checkGeneralSpaceAvailability } from '../services/availabilityService';
 import { getSpaceInfo } from '../data/spacesData';
 import { generateAndDownloadReservationInvoice } from '../services/invoiceService';
+import { AuditService } from '../services/auditService';
 import { calculateDaysBetween, calculateTotalPrice } from '../utils/dateUtils';
 import { logger } from '../utils/logger';
 
@@ -603,6 +604,16 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
     const cashTransactionId = `CASH_${Date.now()}`;
 
     try {
+      try {
+        AuditService.record({
+          actorId: formData.email || formData.fullName || 'client',
+          actorRole: 'staff',
+          action: 'PAYMENT_ATTEMPT',
+          metadata: { method: 'CASH', amount: calculateTotal() },
+          ip: undefined,
+          userAgent: navigator.userAgent,
+        });
+      } catch {}
       const mappedSpaceType = mapSpaceType(selectedSpace || 'coworking');
       const startDateFormatted = selectedDates[0].toISOString().split('T')[0];
       const endDateFormatted = selectedDates[1].toISOString().split('T')[0];
@@ -627,10 +638,39 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
       const result = await createReservation(reservationData);
       
       if (result.success) {
+        try {
+          AuditService.record({
+            actorId: formData.email || formData.fullName || 'client',
+            actorRole: 'staff',
+            action: 'RESERVATION_CREATE',
+            target: reservationData.spaceType,
+            metadata: { transactionId: cashTransactionId, amount: reservationData.amount },
+            ip: undefined,
+            userAgent: navigator.userAgent,
+          });
+          AuditService.record({
+            actorId: formData.email || formData.fullName || 'client',
+            actorRole: 'staff',
+            action: 'PAYMENT_SUCCESS',
+            metadata: { method: 'CASH', transactionId: cashTransactionId, amount: reservationData.amount },
+            ip: undefined,
+            userAgent: navigator.userAgent,
+          });
+        } catch {}
         setReservationSuccess(true);
         setEmailSent(result.emailSent || false);
         setCurrentStep(4);
       } else {
+        try {
+          AuditService.record({
+            actorId: formData.email || formData.fullName || 'client',
+            actorRole: 'staff',
+            action: 'PAYMENT_FAILED',
+            metadata: { method: 'CASH', error: result.error },
+            ip: undefined,
+            userAgent: navigator.userAgent,
+          });
+        } catch {}
         throw new Error(result.error || 'Échec de la création de la réservation');
       }
     } catch (error) {

@@ -7,6 +7,7 @@ import DeleteSpaceModal from './DeleteSpaceModal';
 import SpaceContentEditor from './SpaceContentEditor';
 import { getAllSpaces, getDefaultSpaces, SpaceInfo } from '../data/spacesData';
 import { SpaceContentService } from '../services/spaceContentService';
+import { AuditService } from '../services/auditService';
 
 interface SpaceManagementFormProps {
   language: 'fr' | 'en';
@@ -72,6 +73,16 @@ const SpaceManagementForm: React.FC<SpaceManagementFormProps> = ({ language }) =
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
+    try {
+      AuditService.record({
+        actorId: 'admin',
+        actorRole: 'admin',
+        action: 'DELETE',
+        target: deletedSpaceKey,
+        metadata: { type: 'space' },
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      });
+    } catch {}
   };
 
   // Vérifier si un espace est un espace ajouté (pas un espace par défaut)

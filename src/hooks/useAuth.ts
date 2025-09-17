@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
+import { AuditService } from '../services/auditService';
 
 export interface AuthUser {
   id: string;
@@ -205,6 +206,16 @@ export const useAuth = () => {
     setIsAuthenticated(true);
     
     console.log(`✅ Connexion réussie pour ${userData.username}`);
+    try {
+      AuditService.record({
+        actorId: userData.id,
+        actorRole: type === 'admin' ? 'admin' : 'staff',
+        action: 'LOGIN',
+        metadata: { username: userData.username, email: userData.email },
+        ip: undefined,
+        userAgent: navigator.userAgent,
+      });
+    } catch {}
     
     // Émettre un événement pour notifier les autres composants
     window.dispatchEvent(new CustomEvent('authStateChanged', { 
@@ -230,6 +241,16 @@ export const useAuth = () => {
     setIsAuthenticated(false);
     
     console.log('🚪 Déconnexion effectuée');
+    try {
+      AuditService.record({
+        actorId: user?.id || 'unknown',
+        actorRole: user?.role === 'admin' ? 'admin' : 'staff',
+        action: 'LOGOUT',
+        metadata: { username: user?.username, email: user?.email },
+        ip: undefined,
+        userAgent: navigator.userAgent,
+      });
+    } catch {}
     
     // Émettre un événement pour notifier les autres composants
     window.dispatchEvent(new CustomEvent('authStateChanged', { 

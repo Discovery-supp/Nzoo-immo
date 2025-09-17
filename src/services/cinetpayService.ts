@@ -316,3 +316,28 @@ export const getChannelFromMethod = (method: string): string => {
 };
 
 export default CinetPayService;
+// Audit hooks example (à appeler depuis les pages qui consomment ce service)
+export const auditPaymentInitiated = (params: { actorId: string; method: string; amount: number; transactionId?: string }) => {
+  try {
+    const { AuditService } = require('./auditService');
+    AuditService.record({
+      actorId: params.actorId,
+      actorRole: 'staff',
+      action: 'PAYMENT_ATTEMPT',
+      metadata: { method: params.method, amount: params.amount, transactionId: params.transactionId },
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+    });
+  } catch {}
+};
+export const auditPaymentResult = (params: { actorId: string; method: string; amount: number; transactionId?: string; success: boolean; error?: string }) => {
+  try {
+    const { AuditService } = require('./auditService');
+    AuditService.record({
+      actorId: params.actorId,
+      actorRole: 'staff',
+      action: params.success ? 'PAYMENT_SUCCESS' : 'PAYMENT_FAILED',
+      metadata: { method: params.method, amount: params.amount, transactionId: params.transactionId, error: params.error },
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+    });
+  } catch {}
+};

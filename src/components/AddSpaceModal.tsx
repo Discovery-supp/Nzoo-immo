@@ -3,6 +3,7 @@ import { Plus, X, Save, Upload, DollarSign, Users, FileText } from 'lucide-react
 import { SpaceContentService } from '../services/spaceContentService';
 import { useToastContext } from './ToastProvider';
 import ImageUpload from './ImageUpload';
+import { AuditService } from '../services/auditService';
 
 interface AddSpaceModalProps {
   language: 'fr' | 'en';
@@ -156,6 +157,16 @@ const AddSpaceModal: React.FC<AddSpaceModalProps> = ({ language, onClose, onSpac
       await SpaceContentService.saveContent(updatedData, language);
 
       success(t.success);
+      try {
+        AuditService.record({
+          actorId: 'admin',
+          actorRole: 'admin',
+          action: 'CREATE',
+          target: formData.key,
+          metadata: { type: 'space', title: formData.title },
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+        });
+      } catch {}
       
       // Émettre un événement pour notifier les autres composants
       window.dispatchEvent(new CustomEvent('spaceContentUpdated', {
