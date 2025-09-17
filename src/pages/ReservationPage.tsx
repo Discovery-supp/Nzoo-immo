@@ -7,6 +7,7 @@ import { createReservation } from '../services/reservationService';
 import { checkSpaceAvailability, checkGeneralSpaceAvailability } from '../services/availabilityService';
 import { getSpaceInfo } from '../data/spacesData';
 import { generateAndDownloadReservationInvoice } from '../services/invoiceService';
+import { cinetpayService } from '../services/cinetpayService';
 import { AuditService } from '../services/auditService';
 import { calculateDaysBetween, calculateTotalPrice } from '../utils/dateUtils';
 import { logger } from '../utils/logger';
@@ -822,6 +823,46 @@ const ReservationPage: React.FC<ReservationPageProps> = ({ language, spaceType =
       console.log('🔍 [DEBUG] Paiement en espèces, appel handleCashPayment');
       await handleCashPayment();
       return;
+    }
+
+    // Paiement Mobile Money via CinetPay
+    if (selectedPaymentMethod === 'MOBILE_MONEY') {
+      try {
+        const amount = calculateTotal();
+        const description = `Réservation ${spaceInfo?.title || selectedSpace}`;
+        const clientId = formData.email || formData.fullName || 'client';
+        const clientName = formData.fullName || 'Client';
+        const clientEmail = formData.email || '';
+        const clientPhone = formData.phone || '';
+        // Par défaut, utiliser ORANGE; on pourra rendre ce choix dynamique (ORANGE/AIRTEL)
+        const channel = 'ORANGE';
+
+        console.log('🔍 [DEBUG] Initialisation CinetPay (Mobile Money)');
+        const init = await cinetpayService.initiatePayment(
+          amount,
+          description,
+          clientId,
+          clientName,
+          clientEmail,
+          clientPhone,
+          channel
+        );
+
+        if (init.success && init.paymentUrl) {
+          window.open(init.paymentUrl, '_blank', 'noopener,noreferrer');
+          // Rester à l'étape paiement et afficher un message; la confirmation se fera via retour / webhook
+          setReservationError(null);
+          return;
+        }
+
+        throw new Error(init.error || init.message || "Échec d'initiation Mobile Money");
+      } catch (e) {
+        console.error('❌ [DEBUG] Erreur Mobile Money:', e);
+        setReservationError(
+          language === 'fr' ? "Impossible d'initialiser le paiement Mobile Money. Veuillez réessayer." : 'Unable to initialize Mobile Money payment. Please try again.'
+        );
+        return;
+      }
     }
 
     if (!spaceInfo) {

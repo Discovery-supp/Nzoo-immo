@@ -1,7 +1,7 @@
 import React from 'react';
+import { APP_CONFIG } from '../config/app.config';
 import { CreditCard, Smartphone, Banknote, QrCode } from 'lucide-react';
 import { createQrCodeUrl, initiateMobileMoneyPayment, initiateVisaPayment } from '../services/paymentService';
-import { APP_CONFIG } from '../config/app.config';
 
 interface PaymentSelectorProps {
   language: 'fr' | 'en';
@@ -20,10 +20,17 @@ const PaymentSelector: React.FC<PaymentSelectorProps> = ({ language, amount, onM
     onMethodSelect('MOBILE_MONEY');
     setError(null);
     setIsLoading(true);
-    const phone = customerPhone || '';
+    // Pré-remplir avec un numéro par défaut si disponible
+    const defaults = APP_CONFIG.payments.mobileMoney?.defaultNumbers;
+    const phone = customerPhone || defaults?.ORANGE || '';
     const init = await initiateMobileMoneyPayment(amount, phone);
     setIsLoading(false);
     if (!init.success || !init.reference) { setError(language === 'fr' ? 'Erreur d’initiation Mobile Money' : 'Mobile Money init error'); return; }
+    if (init.paymentUrl) {
+      try {
+        window.open(init.paymentUrl, '_blank', 'noopener,noreferrer');
+      } catch {}
+    }
     if (APP_CONFIG.payments.qrEnabled) {
       const payData = `MM|ref=${init.reference}|amount=${amount}`;
       setQrUrl(createQrCodeUrl(payData));
@@ -56,29 +63,19 @@ const PaymentSelector: React.FC<PaymentSelectorProps> = ({ language, amount, onM
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-3 gap-4">
-        {/* Mobile Money - Désactivé temporairement */}
-        <div className="relative">
-          <button 
-            type="button" 
-            disabled 
-            className="p-4 rounded-xl border-2 border-gray-200 bg-gray-100 cursor-not-allowed opacity-60"
-          >
-            <div className="text-center">
-              <div className="w-10 h-10 bg-gray-400 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Smartphone className="w-5 h-5 text-white" />
-              </div>
-              <div className="font-semibold text-gray-500">{language === 'fr' ? 'Mobile Money' : 'Mobile Money'}</div>
+        {/* Mobile Money - Activé */}
+        <button 
+          type="button" 
+          onClick={handleMobileMoney}
+          className={`p-4 rounded-xl border-2 ${selected === 'MOBILE_MONEY' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-300'}`}
+        >
+          <div className="text-center">
+            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Smartphone className="w-5 h-5 text-white" />
             </div>
-          </button>
-          {/* Message d'indisponibilité */}
-          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-full">
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 text-center">
-              <p className="text-xs text-orange-700 font-medium">
-                {language === 'fr' ? 'Bientôt disponible' : 'Coming soon'}
-              </p>
-            </div>
+            <div className="font-semibold">{language === 'fr' ? 'Mobile Money (Orange/Airtel)' : 'Mobile Money (Orange/Airtel)'}</div>
           </div>
-        </div>
+        </button>
         {/* VISA - Désactivé temporairement */}
         <div className="relative">
           <button 

@@ -9,9 +9,9 @@ export interface PaymentInitResult {
 
 export const initiateMobileMoneyPayment = async (amount: number, customerPhone: string): Promise<PaymentInitResult> => {
   try {
+    // Génère uniquement une référence côté client; l'URL de paiement réelle est fournie par CinetPay côté page de réservation
     const reference = `MM_${Date.now()}`;
-    const paymentUrl = `https://pay.nzoo-immo.local/mobile-money?ref=${reference}&amount=${encodeURIComponent(amount)}`;
-    return { success: true, paymentUrl, reference };
+    return { success: true, reference };
   } catch (e) {
     return { success: false, error: 'Impossible d’initier le paiement Mobile Money' };
   }

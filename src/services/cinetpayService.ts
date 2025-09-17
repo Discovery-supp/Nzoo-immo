@@ -74,15 +74,18 @@ export const CONGO_PAYMENT_METHODS = {
   }
 };
 
-// Configuration par défaut (à remplacer par vos vraies clés)
+// Configuration par défaut (récupère d'abord les variables Vite, puis fallback REACT_APP_*, puis valeurs par défaut)
+const VITE_ENV: any = (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
 const DEFAULT_CONFIG: CinetPayConfig = {
-  apiKey: process.env.REACT_APP_CINETPAY_API_KEY || '17852597076873f647d76131.41366104',
-  siteId: process.env.REACT_APP_CINETPAY_SITE_ID || '105901836',
-  environment: (process.env.REACT_APP_CINETPAY_ENVIRONMENT as 'PROD' | 'TEST') || 'TEST',
-  currency: 'CDF',
-  returnUrl: `${window.location.origin}/payment/success`,
-  cancelUrl: `${window.location.origin}/payment/cancel`,
-  notifyUrl: `${window.location.origin}/api/payment/notify`
+  apiKey: VITE_ENV.VITE_CINETPAY_API_KEY || (typeof process !== 'undefined' ? (process as any).env?.REACT_APP_CINETPAY_API_KEY : undefined) || '17852597076873f647d76131.41366104',
+  siteId: VITE_ENV.VITE_CINETPAY_SITE_ID || (typeof process !== 'undefined' ? (process as any).env?.REACT_APP_CINETPAY_SITE_ID : undefined) || '105901836',
+  environment: (VITE_ENV.VITE_CINETPAY_ENVIRONMENT as 'PROD' | 'TEST')
+    || ((typeof process !== 'undefined' ? (process as any).env?.REACT_APP_CINETPAY_ENVIRONMENT : undefined) as 'PROD' | 'TEST')
+    || 'TEST',
+  currency: VITE_ENV.VITE_CINETPAY_CURRENCY || 'USD',
+  returnUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/payment/success`,
+  cancelUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/payment/cancel`,
+  notifyUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/api/payment/notify`
 };
 
 class CinetPayService {
@@ -163,10 +166,11 @@ class CinetPayService {
            channel: paymentData.channel,
            lang: paymentData.lang,
            // Champs supplémentaires requis par CinetPay
-           metadata: {
-             order_id: `ORDER_${Date.now()}`,
-             customer_id: paymentData.clientId
-           },
+          // CinetPay exige une chaîne pour metadata
+          metadata: JSON.stringify({
+            order_id: `ORDER_${Date.now()}`,
+            customer_id: paymentData.clientId
+          }),
            // Informations sur le produit
            items: [
              {
@@ -183,7 +187,7 @@ class CinetPayService {
 
       console.log('📡 Réponse CinetPay:', result);
 
-      if (result.code === '201') {
+      if (result.code === '201' && result.data?.payment_url) {
         return {
           success: true,
           paymentUrl: result.data.payment_url,
@@ -191,7 +195,7 @@ class CinetPayService {
           message: 'Paiement initialisé avec succès'
         };
       } else {
-        throw new Error(result.message || 'Erreur lors de l\'initialisation du paiement');
+        throw new Error(result.message || result.description || 'Erreur lors de l\'initialisation du paiement');
       }
 
     } catch (error) {
@@ -290,7 +294,7 @@ export const cinetpayService = new CinetPayService();
 export const formatAmount = (amount: number): string => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'XAF'
+    currency: 'USD'
   }).format(amount);
 };
 

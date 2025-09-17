@@ -78,6 +78,14 @@ export const APP_CONFIG = {
     },
     // Activer/désactiver l'affichage et la génération de QR code
     qrEnabled: false,
+    // Configuration Mobile Money
+    mobileMoney: {
+      // Numéros par défaut (peuvent être pré-remplis pour le client ou utilisés comme références internes)
+      defaultNumbers: {
+        ORANGE: '+243840975949',
+        AIRTEL: '+243998187951'
+      },
+    },
   },
 
   // Configuration des emails
