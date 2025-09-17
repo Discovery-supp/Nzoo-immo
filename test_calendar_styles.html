@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Styles Calendrier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Styles du calendrier copiés depuis index.css */
+        .react-calendar {
+            border: 2px solid rgba(107, 114, 128, 0.3);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+            width: 100% !important;
+            max-width: 400px;
+        }
+
+        .react-calendar__navigation {
+            margin-bottom: 1rem;
+        }
+
+        .react-calendar__navigation button {
+            background-color: #1e3a8a; /* blue-800 */
+            color: #fde047; /* text-yellow-300 */
+            border-radius: 0.75rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+            font-weight: 600;
+            min-width: 44px;
+        }
+
+        .react-calendar__navigation button:hover {
+            background-color: #1d4ed8; /* blue-700 */
+            color: #fef08a; /* text-yellow-200 */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .react-calendar__navigation button:disabled {
+            background-color: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .react-calendar__navigation__label {
+            color: #fde047; /* text-yellow-300 */
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .react-calendar__navigation__arrow {
+            color: #fde047; /* text-yellow-300 */
+            font-weight: 700;
+        }
+
+        .react-calendar__month-view__weekdays {
+            margin-bottom: 0.5rem;
+        }
+
+        .react-calendar__month-view__weekdays__weekday {
+            color: #1e3a8a;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.5rem 0;
+        }
+
+        .react-calendar__month-view__days__day {
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            font-weight: 500;
+            min-height: 44px;
+        }
+
+        .react-calendar__tile {
+            padding: 8px 4px;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .react-calendar__tile:hover {
+            background-color: rgba(30, 58, 138, 0.1);
+            transform: scale(1.05);
+        }
+
+        .react-calendar__tile--active {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+
+        .react-calendar__tile--now {
+            background-color: rgba(107, 114, 128, 0.3);
+            color: #1e3a8a;
+            font-weight: 600;
+            border: 2px solid #1e3a8a;
+        }
+
+        .react-calendar__tile--disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .react-calendar__tile--disabled:hover {
+            background-color: #f3f4f6;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto">
+        <h1 class="text-2xl font-bold text-center mb-8 text-gray-800">
+            Test des Styles du Calendrier
+        </h1>
+        
+        <div class="bg-white p-8 rounded-3xl shadow-lg border border-gray-200">
+            <div class="react-calendar">
+                <div class="react-calendar__navigation">
+                    <button class="react-calendar__navigation__arrow">
+                        ‹
+                    </button>
+                    <button class="react-calendar__navigation__label">
+                        Septembre 2025
+                    </button>
+                    <button class="react-calendar__navigation__arrow">
+                        ›
+                    </button>
+                </div>
+                
+                <div class="react-calendar__month-view__weekdays">
+                    <div class="react-calendar__month-view__weekdays__weekday">Lun</div>
+                    <div class="react-calendar__month-view__weekdays__weekday">Mar</div>
+                    <div class="react-calendar__month-view__weekdays__weekday">Mer</div>
+                    <div class="react-calendar__month-view__weekdays__weekday">Jeu</div>
+                    <div class="react-calendar__month-view__weekdays__weekday">Ven</div>
+                    <div class="react-calendar__month-view__weekdays__weekday">Sam</div>
+                    <div class="react-calendar__month-view__weekdays__weekday">Dim</div>
+                </div>
+                
+                <div class="grid grid-cols-7 gap-1">
+                    <div class="react-calendar__tile react-calendar__tile--disabled">26</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">27</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">28</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">29</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">30</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">31</div>
+                    <div class="react-calendar__tile">1</div>
+                    
+                    <div class="react-calendar__tile">2</div>
+                    <div class="react-calendar__tile">3</div>
+                    <div class="react-calendar__tile">4</div>
+                    <div class="react-calendar__tile">5</div>
+                    <div class="react-calendar__tile">6</div>
+                    <div class="react-calendar__tile">7</div>
+                    <div class="react-calendar__tile">8</div>
+                    
+                    <div class="react-calendar__tile">9</div>
+                    <div class="react-calendar__tile">10</div>
+                    <div class="react-calendar__tile">11</div>
+                    <div class="react-calendar__tile">12</div>
+                    <div class="react-calendar__tile">13</div>
+                    <div class="react-calendar__tile">14</div>
+                    <div class="react-calendar__tile">15</div>
+                    
+                    <div class="react-calendar__tile">16</div>
+                    <div class="react-calendar__tile">17</div>
+                    <div class="react-calendar__tile">18</div>
+                    <div class="react-calendar__tile">19</div>
+                    <div class="react-calendar__tile">20</div>
+                    <div class="react-calendar__tile">21</div>
+                    <div class="react-calendar__tile">22</div>
+                    
+                    <div class="react-calendar__tile">23</div>
+                    <div class="react-calendar__tile">24</div>
+                    <div class="react-calendar__tile">25</div>
+                    <div class="react-calendar__tile">26</div>
+                    <div class="react-calendar__tile">27</div>
+                    <div class="react-calendar__tile">28</div>
+                    <div class="react-calendar__tile">29</div>
+                    
+                    <div class="react-calendar__tile">30</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">1</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">2</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">3</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">4</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">5</div>
+                    <div class="react-calendar__tile react-calendar__tile--disabled">6</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h2 class="font-semibold text-blue-800 mb-2">Changements appliqués :</h2>
+            <ul class="text-blue-700 text-sm space-y-1">
+                <li>✅ Navigation : Texte en <span class="font-semibold">jaune clair</span> (text-yellow-300)</li>
+                <li>✅ Mois : Texte en <span class="font-semibold">jaune clair</span> et plus gros (text-lg)</li>
+                <li>✅ Flèches : Texte en <span class="font-semibold">jaune clair</span> et en gras</li>
+                <li>✅ Hover : Texte en <span class="font-semibold">jaune plus clair</span> (text-yellow-200)</li>
+                <li>✅ Ombre : Ajout d'une ombre au survol pour plus de visibilité</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
+/* Base styles */
+@layer base {
+  html {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply font-poppins text-nzoo-dark bg-nzoo-white;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-montserrat;
+  }
+  
+  /* Header spacing - compensation for fixed header */
+  .header-spacing {
+    padding-top: 5rem; /* 80px - matches header height on desktop */
+  }
+  
+  @media (max-width: 640px) {
+    .header-spacing {
+      padding-top: 4rem; /* 64px - matches header height on mobile */
+    }
+  }
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-nzoo::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-nzoo::-webkit-scrollbar-track {
+    @apply bg-nzoo-gray/20 rounded-full;
+  }
+  
+  .scrollbar-nzoo::-webkit-scrollbar-thumb {
+    @apply bg-nzoo-dark/30 rounded-full hover:bg-nzoo-dark/50;
+  }
+  
+  .scrollbar-nzoo::-webkit-scrollbar-thumb:hover {
+    @apply bg-nzoo-dark/60;
+  }
+
+  /* Masquer la barre de défilement */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn-nzoo-primary {
+    @apply bg-gradient-nzoo text-nzoo-white px-6 py-3 rounded-xl font-semibold font-montserrat shadow-soft hover:shadow-nzoo-hover transition-all duration-300 transform hover:scale-105;
+  }
+  
+  .btn-nzoo-secondary {
+    @apply bg-nzoo-white text-nzoo-dark border-2 border-nzoo-gray px-6 py-3 rounded-xl font-semibold font-montserrat hover:bg-nzoo-gray/10 transition-all duration-300;
+  }
+  
+  .card-nzoo {
+    @apply bg-nzoo-white rounded-2xl shadow-soft border border-nzoo-gray/20 p-6 hover:shadow-medium transition-all duration-300;
+  }
+  
+  .input-nzoo {
+    @apply w-full px-4 py-3 border-2 border-nzoo-gray rounded-xl focus:border-nzoo-dark focus:ring-4 focus:ring-nzoo-dark/10 transition-all duration-300 font-poppins placeholder-nzoo-dark/40;
+  }
+  
+  .badge-nzoo {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-montserrat;
+  }
+  
+  /* Page spacing utilities */
+  .page-with-header {
+    @apply pt-20 sm:pt-24; /* 80px on mobile, 96px on desktop */
+  }
+  
+  .section-with-header {
+    @apply pt-32 sm:pt-40; /* 128px on mobile, 160px on desktop */
+  }
+}
+
+/* Login Page Animations */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* React Calendar custom styles */
+.react-calendar {
+  @apply border-2 border-nzoo-gray/30 rounded-2xl shadow-soft font-poppins bg-white;
+  width: 100% !important;
+  max-width: 400px;
+}
+
+.react-calendar__navigation {
+  @apply mb-4;
+}
+
+/* Style spécifique pour le bouton du mois */
+.react-calendar__navigation__label {
+  @apply text-yellow-300 font-bold text-lg;
+}
+
+.react-calendar__navigation button {
+  @apply bg-blue-800 text-yellow-300 rounded-xl px-4 py-2 hover:bg-blue-700 transition-colors duration-200 font-semibold;
+  min-width: 44px;
+}
+
+.react-calendar__navigation button:disabled {
+  @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+}
+
+/* Styles pour les flèches de navigation */
+.react-calendar__navigation__arrow {
+  @apply text-yellow-300 font-bold;
+}
+
+/* Amélioration de la visibilité des boutons de navigation */
+.react-calendar__navigation button:hover {
+  @apply text-yellow-200 shadow-lg;
+}
+
+.react-calendar__month-view__weekdays {
+  @apply mb-2;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  @apply text-nzoo-dark font-semibold text-sm py-2;
+}
+
+.react-calendar__month-view__days__day {
+  @apply rounded-xl transition-all duration-200 font-medium;
+  min-height: 44px;
+}
+
+.react-calendar__tile {
+  @apply hover:bg-nzoo-dark/10 hover:scale-105 transition-all duration-200 rounded-xl;
+  padding: 8px 4px;
+}
+
+.react-calendar__tile--active {
+  @apply bg-gradient-nzoo text-white shadow-soft transform scale-105;
+}
+
+.react-calendar__tile--now {
+  @apply bg-nzoo-gray/30 text-nzoo-dark font-semibold border-2 border-nzoo-dark;
+}
+
+.react-calendar__tile--disabled {
+  @apply bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-100 hover:scale-100;
+}
+
+/* Styles pour les dates non disponibles */
+.react-calendar__tile--unavailable {
+  @apply bg-red-100 text-red-600 cursor-not-allowed hover:bg-red-100 hover:scale-100;
+}
+
+.react-calendar__tile--limited {
+  @apply bg-yellow-100 text-yellow-700 border-2 border-yellow-300;
+}
+
+.react-calendar__tile--available {
+  @apply bg-green-50 text-green-700 border-2 border-green-200;
+}
+
+/* Animation improvements */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(24, 49, 84, 0.1), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}

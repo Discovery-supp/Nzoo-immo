@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Page d'accueil -->
+  <url>
+    <loc>https://nzoo.immo/</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nzoo.immo/en"/>
+  </url>
+  
+  <!-- Page d'accueil en anglais -->
+  <url>
+    <loc>https://nzoo.immo/en</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://nzoo.immo/"/>
+  </url>
+  
+  <!-- Page des espaces -->
+  <url>
+    <loc>https://nzoo.immo/spaces</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nzoo.immo/en/spaces"/>
+  </url>
+  
+  <!-- Page des espaces en anglais -->
+  <url>
+    <loc>https://nzoo.immo/en/spaces</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://nzoo.immo/spaces"/>
+  </url>
+  
+  <!-- Réservation Coworking -->
+  <url>
+    <loc>https://nzoo.immo/reservation/coworking</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nzoo.immo/en/reservation/coworking"/>
+  </url>
+  
+  <!-- Réservation Coworking en anglais -->
+  <url>
+    <loc>https://nzoo.immo/en/reservation/coworking</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://nzoo.immo/reservation/coworking"/>
+  </url>
+  
+  <!-- Réservation Bureau Privé -->
+  <url>
+    <loc>https://nzoo.immo/reservation/bureau-prive</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nzoo.immo/en/reservation/bureau-prive"/>
+  </url>
+  
+  <!-- Réservation Bureau Privé en anglais -->
+  <url>
+    <loc>https://nzoo.immo/en/reservation/bureau-prive</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://nzoo.immo/reservation/bureau-prive"/>
+  </url>
+  
+  <!-- Réservation Domiciliation -->
+  <url>
+    <loc>https://nzoo.immo/reservation/domiciliation</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nzoo.immo/en/reservation/domiciliation"/>
+  </url>
+  
+  <!-- Réservation Domiciliation en anglais -->
+  <url>
+    <loc>https://nzoo.immo/en/reservation/domiciliation</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://nzoo.immo/reservation/domiciliation"/>
+  </url>
+  
+  <!-- Page de connexion client -->
+  <url>
+    <loc>https://nzoo.immo/login</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <!-- Page d'inscription client -->
+  <url>
+    <loc>https://nzoo.immo/signup</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+</urlset>

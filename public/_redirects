@@ -1,0 +1,5 @@
+# Redirections pour l'authentification sociale
+/auth/callback  /auth/callback  200
+
+# Redirections pour les routes SPA
+/*    /index.html   200
